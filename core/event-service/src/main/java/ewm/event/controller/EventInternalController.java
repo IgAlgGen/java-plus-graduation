@@ -36,4 +36,9 @@ public class EventInternalController {
     public List<EventShortInternalDto> getShortEvents(@RequestBody IdsRequest request) {
         return eventInternalService.getShortEvents(request.ids());
     }
+
+    @GetMapping(ApiPaths.EVENTS_EXISTS_BY_CATEGORY)
+    public boolean existsByCategory(@PathVariable("categoryId") Long categoryId) {
+        return eventInternalService.existsByCategory(categoryId);
+    }
 }

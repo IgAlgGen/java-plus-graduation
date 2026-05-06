@@ -2,7 +2,7 @@ package ewm.event.service;
 
 import client.StatsClient;
 import ewm.category.model.Category;
-import ewm.category.repository.CategoryRepository;
+import ewm.category.service.CategoryReferenceService;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
@@ -41,7 +41,7 @@ public class EventServiceImpl implements EventService {
     private final UserReferenceService userReferenceService;
     private final EventRepository eventRepository;
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
-    private final CategoryRepository categoryRepository;
+    private final CategoryReferenceService categoryReferenceService;
     private final StatsClient statsClient;
     private final RequestClient requestClient;
 
@@ -52,8 +52,7 @@ public class EventServiceImpl implements EventService {
 
         User user = userReferenceService.getExistingReference(userId);
 
-        Category category = categoryRepository.findById(eventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+        Category category = categoryReferenceService.getExistingReference(eventDto.getCategory());
 
         Event event = EventMapper.mapToEvent(user, eventDto, category);
         event.setCreatedOn(LocalDateTime.now());
@@ -183,8 +182,7 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventUserRequest.hasCategory() &&
                 !updatedEvent.getCategory().getId().equals(updateEventUserRequest.getCategory())) {
-            Category category = categoryRepository.findById(updateEventUserRequest.getCategory())
-                            .orElseThrow(() -> new NotFoundException("Category not found"));
+            Category category = categoryReferenceService.getExistingReference(updateEventUserRequest.getCategory());
             updatedEvent.setCategory(category);
         }
 
@@ -226,8 +224,7 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventAdminRequest.hasCategory() &&
                 !updatedEvent.getCategory().getId().equals(updateEventAdminRequest.getCategory())) {
-            Category category = categoryRepository.findById(updateEventAdminRequest.getCategory())
-                    .orElseThrow(() -> new NotFoundException("Category not found"));
+            Category category = categoryReferenceService.getExistingReference(updateEventAdminRequest.getCategory());
             updatedEvent.setCategory(category);
         }
 

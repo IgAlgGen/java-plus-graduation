@@ -14,4 +14,6 @@ public interface EventInternalService {
     Map<Long, Boolean> existsEvents(List<Long> ids);
 
     List<EventShortInternalDto> getShortEvents(List<Long> ids);
+
+    boolean existsByCategory(Long categoryId);
 }

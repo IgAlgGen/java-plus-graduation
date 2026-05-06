@@ -72,4 +72,10 @@ public class EventInternalServiceImpl implements EventInternalService {
                 .map(EventInternalMapper::toShortInternalDto)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByCategory(Long categoryId) {
+        return eventRepository.existsByCategoryId(categoryId);
+    }
 }

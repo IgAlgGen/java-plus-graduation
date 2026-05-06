@@ -30,6 +30,10 @@ spring:
           uri: lb://request-service
           predicates:
             - Path=/users/*/requests,/users/*/requests/**,/users/*/events/*/requests
+        - id: feature-service-category-api
+          uri: lb://feature-service
+          predicates:
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**
         - id: event-service-api
           uri: lb://event-service
           predicates:

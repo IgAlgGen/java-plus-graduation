@@ -13,6 +13,7 @@ public final class ApiPaths {
     public static final String EVENTS_BATCH = EVENTS + "/batch";
     public static final String EVENTS_EXISTS_BATCH = EVENTS + "/exists";
     public static final String EVENTS_SHORT_BATCH = EVENTS + "/short";
+    public static final String EVENTS_EXISTS_BY_CATEGORY = EVENTS + "/categories/{categoryId}/exists";
 
     public static final String REQUESTS = INTERNAL_PREFIX + "/requests";
     public static final String REQUESTS_CONFIRMED_COUNTS = REQUESTS + "/confirmed-counts";
@@ -22,6 +23,7 @@ public final class ApiPaths {
     public static final String CATEGORIES = INTERNAL_PREFIX + "/categories";
     public static final String CATEGORIES_BY_ID = CATEGORIES + "/{categoryId}";
     public static final String CATEGORIES_BATCH = CATEGORIES + "/batch";
+    public static final String CATEGORIES_EXISTS_BATCH = CATEGORIES + "/exists";
 
     private ApiPaths() {
     }
