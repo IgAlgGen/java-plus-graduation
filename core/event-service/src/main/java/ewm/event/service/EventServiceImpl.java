@@ -1,6 +1,5 @@
 package ewm.event.service;
 
-import client.StatsClient;
 import ewm.category.model.Category;
 import ewm.category.service.CategoryReferenceService;
 import ewm.common.exception.BadRequestException;
@@ -28,7 +27,6 @@ import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
-import ru.practicum.ewm.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -43,7 +41,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
     private final CategoryReferenceService categoryReferenceService;
-    private final StatsClient statsClient;
+    private final StatsResilienceService statsResilienceService;
     private final RequestClient requestClient;
 
     @Override
@@ -248,44 +246,11 @@ public class EventServiceImpl implements EventService {
         endpointHitDto.setUri(request.getRequestURI());
         endpointHitDto.setIp(request.getRemoteAddr());
         endpointHitDto.setTimestamp(LocalDateTime.now());
-        statsClient.hit(endpointHitDto);
-    }
-
-    private Map<Long, Integer> getEventsViews(List<Event> eventList) {
-        if (eventList == null || eventList.isEmpty()) return Map.of();
-
-        List<String> uris = eventList.stream()
-                .map(e -> "/events/" + e.getId())
-                .toList();
-
-        LocalDateTime start = eventList.stream()
-                .map(Event::getCreatedOn)
-                .filter(java.util.Objects::nonNull)
-                .min(Comparator.naturalOrder())
-                .orElse(LocalDateTime.now().minusYears(1));
-
-        LocalDateTime end = LocalDateTime.now();
-
-        try {
-            List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
-
-            Map<Long, Integer> map = new HashMap<>();
-            for (ViewStatsDto s : stats) {
-                String[] parts = s.getUri().split("/");
-                if (parts.length >= 3) {
-                    long eventId = Long.parseLong(parts[2]);
-                    map.put(eventId, (int) s.getHits());
-                }
-            }
-            return map;
-        } catch (Exception ex) {
-            // критично: не роняем эндпоинт
-            return Map.of();
-        }
+        statsResilienceService.hit(endpointHitDto);
     }
 
     private List<EventFullDto> mapToEventFullDto(List<Event> eventList) {
-        Map<Long, Integer> views = getEventsViews(eventList);
+        Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
 
@@ -316,7 +281,7 @@ public class EventServiceImpl implements EventService {
 
 
     private List<EventShortDto> mapToEventShortDto(List<Event> eventList) {
-        Map<Long, Integer> views = getEventsViews(eventList);
+        Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
 
