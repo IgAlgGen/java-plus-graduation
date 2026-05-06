@@ -5,16 +5,13 @@ FROM maven:3.9.9-eclipse-temurin-21 AS builder
 
 WORKDIR /build
 
-# Copy only pom files first to leverage Docker cache
 COPY pom.xml .
 COPY */pom.xml ./
 COPY */*/pom.xml ./
 
-# Copy full source
 COPY . .
 
-# Build only this service and the modules it depends on
-RUN mvn -B clean package -DskipTests -pl stats-service/stats-server -am
+RUN mvn -B clean package -DskipTests -pl infra/config-server -am
 
 # =========================
 # Runtime stage
@@ -23,8 +20,6 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# Copy the final jar (adjust path if needed)
-COPY --from=builder /build/stats-service/stats-server/target/*jar app.jar
-
+COPY --from=builder /build/infra/config-server/target/config-server-0.0.1-SNAPSHOT.jar app.jar
 
 ENTRYPOINT ["java","-jar","app.jar"]

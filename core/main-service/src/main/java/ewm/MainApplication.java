@@ -1,13 +1,16 @@
-package ru.practicum.stats;
+package ewm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class StatsServerApplication {
+@ComponentScan(basePackages = {"ru.practicum", "ewm", "client"})
+public class MainApplication {
     public static void main(String[] args) {
-        SpringApplication.run(StatsServerApplication.class, args);
+        SpringApplication.run(MainApplication.class, args);
     }
+
 }

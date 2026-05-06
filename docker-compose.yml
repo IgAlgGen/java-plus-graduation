@@ -1,11 +1,42 @@
 services:
 
+  discovery-server:
+    build:
+      context: .
+      dockerfile: infra/discovery-server/Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -ec '</dev/tcp/127.0.0.1/8761'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  config-server:
+    build:
+      context: .
+      dockerfile: infra/config-server/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "bash -ec '</dev/tcp/127.0.0.1/8888'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: on-failure
+
   stats-db:
     image: postgres:16.1
     environment:
       POSTGRES_DB: stats
       POSTGRES_USER: stats
       POSTGRES_PASSWORD: stats
+    volumes:
+      - ./stats-service/stats-server/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U stats"]
       interval: 5s
@@ -16,11 +47,16 @@ services:
       context: .
       dockerfile: stats-service/stats-server/Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
       stats-db:
         condition: service_healthy
-    ports:
-      - "9090:9090"
     environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
       SPRING_DATASOURCE_USERNAME: stats
       SPRING_DATASOURCE_PASSWORD: stats
@@ -32,26 +68,49 @@ services:
       POSTGRES_USER: main
       POSTGRES_PASSWORD: main
     volumes:
-      - ./main-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./core/main-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ewm-main"]
+      test: ["CMD-SHELL", "pg_isready -U main -d ewm-main"]
       interval: 5s
       retries: 5
 
   ewm-service:
     build:
       context: .
-      dockerfile: main-service/Dockerfile
+      dockerfile: core/main-service/Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
       ewm-db:
         condition: service_healthy
       stats-server:
         condition: service_started
-    ports:
-      - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm-main
       SPRING_DATASOURCE_USERNAME: main
       SPRING_DATASOURCE_PASSWORD: main
-      STATS_SERVICE_URL: http://stats-server:9090
+      STATS_SERVICE_ID: stats-server
+
+  gateway-server:
+    build:
+      context: .
+      dockerfile: infra/gateway-server/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      ewm-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
