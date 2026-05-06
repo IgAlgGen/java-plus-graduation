@@ -57,10 +57,7 @@ public class EventMapper {
         eventFullDto.setRequestModeration(event.getRequestModeration());
         eventFullDto.setState(event.getState() == null ? null : event.getState().name());
         eventFullDto.setViews(views);
-
-        // TODO Request
         eventFullDto.setConfirmedRequests(confirmedRequests);
-
         return eventFullDto;
     }
 
@@ -73,8 +70,6 @@ public class EventMapper {
         eventShortDto.setTitle(event.getTitle());
         eventShortDto.setAnnotation(event.getAnnotation());
         eventShortDto.setCategory(CategoryMapper.toDto(event.getCategory()));
-
-        // TODO Request
         eventShortDto.setConfirmedRequests(confirmedRequests);
         eventShortDto.setViews(views);
         eventShortDto.setEventDate(event.getEventDate());
