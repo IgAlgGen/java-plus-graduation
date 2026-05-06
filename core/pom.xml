@@ -17,6 +17,7 @@
     <modules>
         <module>internal-api</module>
         <module>user-service</module>
+        <module>event-service</module>
         <module>main-service</module>
     </modules>
 

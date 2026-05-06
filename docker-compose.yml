@@ -85,12 +85,40 @@ services:
         condition: service_healthy
       ewm-db:
         condition: service_healthy
+      event-service:
+        condition: service_started
       user-service:
         condition: service_started
       stats-server:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm-main
+      SPRING_DATASOURCE_USERNAME: main
+      SPRING_DATASOURCE_PASSWORD: main
+      STATS_SERVICE_ID: stats-server
+      USER_SERVICE_ID: user-service
+      EVENT_SERVICE_ID: event-service
+
+  event-service:
+    build:
+      context: .
+      dockerfile: core/event-service/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      ewm-db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      stats-server:
+        condition: service_started
+    environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
@@ -129,6 +157,8 @@ services:
       config-server:
         condition: service_healthy
       ewm-service:
+        condition: service_started
+      event-service:
         condition: service_started
       user-service:
         condition: service_started

@@ -22,6 +22,14 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/admin/users/**
+        - id: main-service-event-comments-api
+          uri: lb://main-service
+          predicates:
+            - Path=/events/*/comments
+        - id: event-service-api
+          uri: lb://event-service
+          predicates:
+            - Path=/events,/events/*,/admin/events/**,/users/*/events,/users/*/events/*
         - id: main-service-api
           uri: lb://main-service
           predicates:

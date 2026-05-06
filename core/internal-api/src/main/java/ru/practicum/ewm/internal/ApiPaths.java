@@ -12,6 +12,7 @@ public final class ApiPaths {
     public static final String EVENTS_BY_ID = EVENTS + "/{eventId}";
     public static final String EVENTS_BATCH = EVENTS + "/batch";
     public static final String EVENTS_EXISTS_BATCH = EVENTS + "/exists";
+    public static final String EVENTS_SHORT_BATCH = EVENTS + "/short";
 
     public static final String REQUESTS = INTERNAL_PREFIX + "/requests";
     public static final String REQUESTS_CONFIRMED_COUNTS = REQUESTS + "/confirmed-counts";
