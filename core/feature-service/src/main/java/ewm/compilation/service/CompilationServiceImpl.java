@@ -7,7 +7,6 @@ import ewm.compilation.dto.UpdateCompilationRequest;
 import ewm.compilation.mapper.CompilationMapper;
 import ewm.compilation.model.Compilation;
 import ewm.compilation.repository.CompilationRepository;
-import ewm.event.model.Event;
 import ewm.event.client.EventClient;
 import ewm.event.service.EventReferenceService;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +40,8 @@ public class CompilationServiceImpl implements CompilationService {
         comp.setTitle(dto.getTitle());
         comp.setPinned(dto.getPinned() != null ? dto.getPinned() : false);
 
-        Set<Event> events = loadEvents(dto.getEvents());
-        comp.setEvents(events);
+        Set<Long> eventIds = loadEventIds(dto.getEvents());
+        comp.setEventIds(eventIds);
 
         Compilation saved = compilationRepository.save(comp);
         return mapCompilation(saved);
@@ -61,7 +60,7 @@ public class CompilationServiceImpl implements CompilationService {
             comp.setPinned(dto.getPinned());
         }
         if (dto.getEvents() != null) {
-            comp.setEvents(loadEvents(dto.getEvents()));
+            comp.setEventIds(loadEventIds(dto.getEvents()));
         }
 
         Compilation saved = compilationRepository.save(comp);
@@ -100,12 +99,13 @@ public class CompilationServiceImpl implements CompilationService {
         return mapCompilation(comp);
     }
 
-    private Set<Event> loadEvents(Set<Long> eventIds) {
+    private Set<Long> loadEventIds(Set<Long> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) {
             return new HashSet<>();
         }
 
-        return new HashSet<>(eventReferenceService.getExistingReferences(eventIds));
+        eventReferenceService.ensureEventsExist(eventIds);
+        return new HashSet<>(eventIds);
     }
 
     private CompilationDto mapCompilation(Compilation compilation) {
@@ -114,8 +114,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     private Map<Long, EventShortInternalDto> eventsById(List<Compilation> compilations) {
         List<Long> ids = compilations.stream()
-                .flatMap(compilation -> compilation.getEvents().stream())
-                .map(Event::getId)
+                .flatMap(compilation -> compilation.getEventIds().stream())
                 .distinct()
                 .toList();
 

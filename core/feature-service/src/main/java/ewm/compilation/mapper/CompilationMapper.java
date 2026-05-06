@@ -16,8 +16,8 @@ public class CompilationMapper {
                 c.getId(),
                 c.getTitle(),
                 c.getPinned(),
-                c.getEvents().stream()
-                        .map(e -> toEventShortDto(events.get(e.getId())))
+                c.getEventIds().stream()
+                        .map(id -> toEventShortDto(events.get(id)))
                         .filter(java.util.Objects::nonNull)
                         .collect(java.util.stream.Collectors.toSet())
         );

@@ -21,8 +21,12 @@ public class EventReferenceService {
     private final EntityManager entityManager;
 
     public Event getExistingReference(Long eventId) {
-        eventClient.getEvent(eventId);
+        ensureEventExists(eventId);
         return entityManager.getReference(Event.class, eventId);
+    }
+
+    public void ensureEventExists(Long eventId) {
+        eventClient.getEvent(eventId);
     }
 
     public Event getPublishedReference(Long eventId) {
@@ -33,9 +37,23 @@ public class EventReferenceService {
         return entityManager.getReference(Event.class, eventId);
     }
 
+    public void ensurePublished(Long eventId) {
+        EventInternalDto event = eventClient.getEvent(eventId);
+        if (!"PUBLISHED".equals(event.state())) {
+            throw new ewm.common.exception.ConflictException("Comments can only be added to published events");
+        }
+    }
+
     public Set<Event> getExistingReferences(Set<Long> eventIds) {
+        ensureEventsExist(eventIds);
+        return eventIds.stream()
+                .map(id -> entityManager.getReference(Event.class, id))
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    public void ensureEventsExist(Set<Long> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) {
-            return Set.of();
+            return;
         }
 
         Map<Long, Boolean> existing = eventClient.existsEvents(new IdsRequest(eventIds.stream().toList()));
@@ -43,9 +61,5 @@ public class EventReferenceService {
         if (!allExist) {
             throw new NotFoundException("Some events not found");
         }
-
-        return eventIds.stream()
-                .map(id -> entityManager.getReference(Event.class, id))
-                .collect(java.util.stream.Collectors.toSet());
     }
 }

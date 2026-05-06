@@ -20,8 +20,8 @@ public final class CommentMapper {
         return CommentDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())
-                .author(comment.getAuthor().getUserId())
-                .event(comment.getEvent().getId())
+                .author(getAuthorId(comment))
+                .event(getEventId(comment))
                 .status(comment.getStatus().name())
                 .createdOn(comment.getCreatedOn())
                 .updatedOn(comment.getUpdatedOn())
@@ -33,5 +33,19 @@ public final class CommentMapper {
             comment.setText(updateCommentRequest.getText());
         }
         return comment;
+    }
+
+    public static Long getEventId(Comment comment) {
+        if (comment.getEventId() != null) {
+            return comment.getEventId();
+        }
+        return comment.getEvent().getId();
+    }
+
+    public static Long getAuthorId(Comment comment) {
+        if (comment.getAuthorId() != null) {
+            return comment.getAuthorId();
+        }
+        return comment.getAuthor().getUserId();
     }
 }

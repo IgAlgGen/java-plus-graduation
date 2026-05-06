@@ -9,9 +9,7 @@ import ewm.comment.model.CommentStatus;
 import ewm.comment.repository.CommentRepository;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
-import ewm.event.model.Event;
 import ewm.event.service.EventReferenceService;
-import ewm.user.model.User;
 import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +30,12 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto create(Long userId, Long eventId, NewCommentDto newCommentDto) {
-        User user = userReferenceService.getExistingReference(userId);
-
-        Event event = eventReferenceService.getPublishedReference(eventId);
+        userReferenceService.ensureExists(userId);
+        eventReferenceService.ensurePublished(eventId);
 
         Comment comment = CommentMapper.mapToComment(newCommentDto);
-        comment.setAuthor(user);
-        comment.setEvent(event);
+        comment.setAuthorId(userId);
+        comment.setEventId(eventId);
         comment.setStatus(CommentStatus.NEW);
 
         Comment saved = commentRepository.save(comment);
@@ -65,7 +62,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getEventComments(Long eventId, int from, int size) {
-        eventReferenceService.getExistingReference(eventId);
+        eventReferenceService.ensureEventExists(eventId);
 
         Pageable page = PageRequest.of(from / size, size);
         List<Comment> comments = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.APPROVED, page);
