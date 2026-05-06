@@ -28,7 +28,7 @@ public class DatabaseEventSearchRepository {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (users != null && !users.isEmpty()) {
-            builder.and(event.initiator.userId.in(users));
+            builder.and(event.initiatorId.in(users));
         }
 
         if (states != null && !states.isEmpty()) {
@@ -36,7 +36,7 @@ public class DatabaseEventSearchRepository {
         }
 
         if (categories != null && !categories.isEmpty()) {
-            builder.and(event.category.id.in(categories));
+            builder.and(event.categoryId.in(categories));
         }
 
         if (rangeStart != null) {
@@ -76,7 +76,7 @@ public class DatabaseEventSearchRepository {
         }
 
         if (categories != null && !categories.isEmpty()) {
-            builder.and(event.category.id.in(categories));
+            builder.and(event.categoryId.in(categories));
         }
 
         if (paid != null) {

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
+import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 
@@ -180,7 +181,7 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventUserRequest);
 
         if (updateEventUserRequest.hasCategory() &&
-                !updatedEvent.getCategory().getId().equals(updateEventUserRequest.getCategory())) {
+                !EventMapper.getCategoryId(updatedEvent).equals(updateEventUserRequest.getCategory())) {
             Category category = categoryReferenceService.getExistingReference(updateEventUserRequest.getCategory());
             updatedEvent.setCategory(category);
         }
@@ -222,7 +223,7 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventAdminRequest);
 
         if (updateEventAdminRequest.hasCategory() &&
-                !updatedEvent.getCategory().getId().equals(updateEventAdminRequest.getCategory())) {
+                !EventMapper.getCategoryId(updatedEvent).equals(updateEventAdminRequest.getCategory())) {
             Category category = categoryReferenceService.getExistingReference(updateEventAdminRequest.getCategory());
             updatedEvent.setCategory(category);
         }
@@ -253,13 +254,15 @@ public class EventServiceImpl implements EventService {
         Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
+        Map<Long, CategoryInternalDto> categories = getCategories(eventList);
 
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventFullDto(
                         e,
                         views.getOrDefault(e.getId(), 0),
                         confirmed.getOrDefault(e.getId(), 0L),
-                        initiators.get(EventMapper.getInitiatorId(e))
+                        initiators.get(EventMapper.getInitiatorId(e)),
+                        categories.get(EventMapper.getCategoryId(e))
                 ))
                 .toList();
     }
@@ -284,13 +287,15 @@ public class EventServiceImpl implements EventService {
         Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
+        Map<Long, CategoryInternalDto> categories = getCategories(eventList);
 
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventShortDto(
                         e,
                         views.getOrDefault(e.getId(), 0),
                         confirmed.getOrDefault(e.getId(), 0L),
-                        initiators.get(EventMapper.getInitiatorId(e))
+                        initiators.get(EventMapper.getInitiatorId(e)),
+                        categories.get(EventMapper.getCategoryId(e))
                 ))
                 .toList();
     }
@@ -305,5 +310,17 @@ public class EventServiceImpl implements EventService {
                 .toList();
 
         return userReferenceService.getUsersByIds(ids);
+    }
+
+    private Map<Long, CategoryInternalDto> getCategories(List<Event> eventList) {
+        if (eventList == null || eventList.isEmpty()) return Map.of();
+
+        List<Long> ids = eventList.stream()
+                .map(EventMapper::getCategoryId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        return categoryReferenceService.getCategoriesByIds(ids);
     }
 }

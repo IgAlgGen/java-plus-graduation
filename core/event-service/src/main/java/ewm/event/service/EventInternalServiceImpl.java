@@ -5,12 +5,14 @@ import ewm.event.mapper.EventInternalMapper;
 import ewm.event.mapper.EventMapper;
 import ewm.event.model.Event;
 import ewm.event.repository.DatabaseEventRepository;
+import ewm.category.service.CategoryReferenceService;
 import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.internal.dto.EventInternalDto;
 import ru.practicum.ewm.internal.dto.EventShortInternalDto;
+import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 
 import java.util.LinkedHashMap;
@@ -24,6 +26,7 @@ public class EventInternalServiceImpl implements EventInternalService {
 
     private final DatabaseEventRepository eventRepository;
     private final UserReferenceService userReferenceService;
+    private final CategoryReferenceService categoryReferenceService;
 
     @Override
     @Transactional(readOnly = true)
@@ -78,11 +81,17 @@ public class EventInternalServiceImpl implements EventInternalService {
                 .filter(java.util.Objects::nonNull)
                 .distinct()
                 .toList());
+        Map<Long, CategoryInternalDto> categories = categoryReferenceService.getCategoriesByIds(events.stream()
+                .map(EventMapper::getCategoryId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList());
 
         return events.stream()
                 .map(event -> EventInternalMapper.toShortInternalDto(
                         event,
-                        initiators.get(EventMapper.getInitiatorId(event))
+                        initiators.get(EventMapper.getInitiatorId(event)),
+                        categories.get(EventMapper.getCategoryId(event))
                 ))
                 .toList();
     }

@@ -17,9 +17,9 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
     @Query("""
             SELECT e
             FROM Event e
-            WHERE (:users IS NULL OR e.initiator.id IN :users)
+            WHERE (:users IS NULL OR e.initiatorId IN :users)
             AND (:states IS NULL OR e.state IN :states)
-            AND (:categories IS NULL OR e.category.id IN :categories)
+            AND (:categories IS NULL OR e.categoryId IN :categories)
             AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart)
             AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
             """)
@@ -37,7 +37,7 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
             WHERE e.state = 'PUBLISHED'
             AND (:text IS NULL OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%'))
                      OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))
-            AND (:categories IS NULL OR e.category.id IN :categories)
+            AND (:categories IS NULL OR e.categoryId IN :categories)
             AND (:paid IS NULL OR e.paid = :paid)
             AND (e.eventDate >= :rangeStart)
             AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)

@@ -25,16 +25,19 @@ public class Event {
 
     /* === Relations === */
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
     @Column(name = "initiator_id", insertable = false, updatable = false)
     private Long initiatorId;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @Column(name = "category_id", insertable = false, updatable = false)
+    private Long categoryId;
 
     /* === Basic fields === */
 

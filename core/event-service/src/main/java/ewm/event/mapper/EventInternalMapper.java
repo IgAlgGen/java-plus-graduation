@@ -3,6 +3,7 @@ package ewm.event.mapper;
 import ewm.event.model.Event;
 import ru.practicum.ewm.internal.dto.EventInternalDto;
 import ru.practicum.ewm.internal.dto.EventShortInternalDto;
+import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 
 public class EventInternalMapper {
@@ -11,7 +12,7 @@ public class EventInternalMapper {
         return new EventInternalDto(
                 event.getId(),
                 EventMapper.getInitiatorId(event),
-                event.getCategory().getId(),
+                EventMapper.getCategoryId(event),
                 event.getTitle(),
                 event.getState() == null ? null : event.getState().name(),
                 event.getParticipantLimit(),
@@ -20,15 +21,17 @@ public class EventInternalMapper {
         );
     }
 
-    public static EventShortInternalDto toShortInternalDto(Event event, UserInternalDto initiator) {
+    public static EventShortInternalDto toShortInternalDto(Event event,
+                                                          UserInternalDto initiator,
+                                                          CategoryInternalDto category) {
         return new EventShortInternalDto(
                 event.getId(),
                 event.getTitle(),
                 event.getAnnotation(),
                 EventMapper.getInitiatorId(event),
                 initiator == null ? null : initiator.name(),
-                event.getCategory().getId(),
-                event.getCategory().getName(),
+                EventMapper.getCategoryId(event),
+                category == null ? null : category.name(),
                 event.getEventDate(),
                 event.getPaid()
         );
