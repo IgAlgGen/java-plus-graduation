@@ -2,6 +2,7 @@ package ewm.request.mapper;
 
 import ewm.request.dto.ParticipationRequestDto;
 import ewm.request.model.ParticipationRequest;
+import ru.practicum.ewm.internal.dto.ParticipationRequestInternalDto;
 
 public final class ParticipationRequestMapper {
 
@@ -16,5 +17,15 @@ public final class ParticipationRequestMapper {
                 .requester(r.getRequester().getUserId())
                 .status(r.getStatus().name())
                 .build();
+    }
+
+    public static ParticipationRequestInternalDto toInternalDto(ParticipationRequest r) {
+        return new ParticipationRequestInternalDto(
+                r.getId(),
+                r.getCreated(),
+                r.getEvent().getId(),
+                r.getRequester().getUserId(),
+                r.getStatus().name()
+        );
     }
 }

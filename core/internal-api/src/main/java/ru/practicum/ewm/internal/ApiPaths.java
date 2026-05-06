@@ -16,6 +16,8 @@ public final class ApiPaths {
 
     public static final String REQUESTS = INTERNAL_PREFIX + "/requests";
     public static final String REQUESTS_CONFIRMED_COUNTS = REQUESTS + "/confirmed-counts";
+    public static final String REQUESTS_BY_EVENT = REQUESTS + "/events/{eventId}";
+    public static final String REQUESTS_USER_EVENTS_EXISTS = REQUESTS + "/users/{userId}/events/exists";
 
     public static final String CATEGORIES = INTERNAL_PREFIX + "/categories";
     public static final String CATEGORIES_BY_ID = CATEGORIES + "/{categoryId}";

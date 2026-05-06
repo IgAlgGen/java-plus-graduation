@@ -14,7 +14,7 @@ import ewm.event.model.EventState;
 import ewm.event.model.EventStateActionAdmin;
 import ewm.event.repository.DatabaseEventSearchRepository;
 import ewm.event.repository.EventRepository;
-import ewm.request.repository.ParticipationRequestRepository;
+import ewm.request.client.RequestClient;
 import ewm.user.model.User;
 import ewm.user.service.UserReferenceService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
+import ru.practicum.ewm.internal.dto.IdsRequest;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 import ru.practicum.ewm.stats.dto.ViewStatsDto;
 
@@ -41,7 +43,7 @@ public class EventServiceImpl implements EventService {
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
     private final CategoryRepository categoryRepository;
     private final StatsClient statsClient;
-    private final ParticipationRequestRepository participationRequestRepository;
+    private final RequestClient requestClient;
 
     @Override
     @Transactional
@@ -306,9 +308,8 @@ public class EventServiceImpl implements EventService {
                 .toList();
 
         Map<Long, Long> map = new HashMap<>();
-        for (ParticipationRequestRepository.EventConfirmedCount row
-                : participationRequestRepository.countConfirmedByEventIds(ids)) {
-            map.put(row.getEventId(), row.getCnt());
+        for (EventConfirmedRequestsInternalDto row : requestClient.getConfirmedCounts(new IdsRequest(ids))) {
+            map.put(row.eventId(), row.confirmedRequests());
         }
         return map;
     }
