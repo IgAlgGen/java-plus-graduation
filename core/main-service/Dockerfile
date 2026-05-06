@@ -14,7 +14,7 @@ COPY */*/pom.xml ./
 COPY . .
 
 # Build only this service and the modules it depends on
-RUN mvn -B clean package -DskipTests -pl stats-service/stats-server -am
+RUN mvn -B clean package -DskipTests -pl core/main-service -am
 
 # =========================
 # Runtime stage
@@ -23,8 +23,6 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# Copy the final jar (adjust path if needed)
-COPY --from=builder /build/stats-service/stats-server/target/*jar app.jar
-
-
+# core/main-service/Dockerfile
+COPY --from=builder /build/core/main-service/target/main-service-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
