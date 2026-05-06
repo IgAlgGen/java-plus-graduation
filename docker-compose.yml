@@ -143,6 +143,8 @@ services:
         condition: service_healthy
       ewm-db:
         condition: service_healthy
+      user-service:
+        condition: service_started
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
@@ -150,6 +152,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm-main
       SPRING_DATASOURCE_USERNAME: main
       SPRING_DATASOURCE_PASSWORD: main
+      USER_SERVICE_ID: user-service
       EVENT_SERVICE_ID: event-service
 
   request-service:

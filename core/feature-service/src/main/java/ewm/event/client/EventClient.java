@@ -3,6 +3,7 @@ package ewm.event.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.internal.ApiPaths;
+import ru.practicum.ewm.internal.dto.EventInternalDto;
 import ru.practicum.ewm.internal.dto.EventShortInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
 
@@ -11,6 +12,9 @@ import java.util.Map;
 
 @FeignClient(name = "${event.service.id:event-service}")
 public interface EventClient {
+
+    @GetMapping(ApiPaths.EVENTS_BY_ID)
+    EventInternalDto getEvent(@PathVariable("eventId") Long eventId);
 
     @GetMapping(ApiPaths.EVENTS_EXISTS_BY_CATEGORY)
     Boolean existsByCategory(@PathVariable("categoryId") Long categoryId);

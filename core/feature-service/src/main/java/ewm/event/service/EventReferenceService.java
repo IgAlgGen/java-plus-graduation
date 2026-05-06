@@ -6,6 +6,7 @@ import ewm.event.model.Event;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.internal.dto.EventInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
 
 import java.util.List;
@@ -18,6 +19,19 @@ public class EventReferenceService {
 
     private final EventClient eventClient;
     private final EntityManager entityManager;
+
+    public Event getExistingReference(Long eventId) {
+        eventClient.getEvent(eventId);
+        return entityManager.getReference(Event.class, eventId);
+    }
+
+    public Event getPublishedReference(Long eventId) {
+        EventInternalDto event = eventClient.getEvent(eventId);
+        if (!"PUBLISHED".equals(event.state())) {
+            throw new ewm.common.exception.ConflictException("Comments can only be added to published events");
+        }
+        return entityManager.getReference(Event.class, eventId);
+    }
 
     public Set<Event> getExistingReferences(Set<Long> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) {

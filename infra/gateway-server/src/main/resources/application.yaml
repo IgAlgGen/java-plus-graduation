@@ -14,16 +14,16 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: main-service-admin-user-comments-api
-          uri: lb://main-service
+        - id: feature-service-admin-user-comments-api
+          uri: lb://feature-service
           predicates:
             - Path=/admin/users/*/events/*/comments,/admin/users/*/comments/*
         - id: user-service-api
           uri: lb://user-service
           predicates:
             - Path=/admin/users/**
-        - id: main-service-event-comments-api
-          uri: lb://main-service
+        - id: feature-service-event-comments-api
+          uri: lb://feature-service
           predicates:
             - Path=/events/*/comments
         - id: request-service-api
@@ -33,7 +33,7 @@ spring:
         - id: feature-service-category-api
           uri: lb://feature-service
           predicates:
-            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**,/comments,/comments/**,/admin/comments,/admin/comments/**
         - id: event-service-api
           uri: lb://event-service
           predicates:
