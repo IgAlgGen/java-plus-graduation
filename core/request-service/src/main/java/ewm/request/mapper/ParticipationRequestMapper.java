@@ -13,8 +13,8 @@ public final class ParticipationRequestMapper {
         return ParticipationRequestDto.builder()
                 .id(r.getId())
                 .created(r.getCreated())
-                .event(r.getEvent().getId())
-                .requester(r.getRequester().getUserId())
+                .event(getEventId(r))
+                .requester(getRequesterId(r))
                 .status(r.getStatus().name())
                 .build();
     }
@@ -23,9 +23,23 @@ public final class ParticipationRequestMapper {
         return new ParticipationRequestInternalDto(
                 r.getId(),
                 r.getCreated(),
-                r.getEvent().getId(),
-                r.getRequester().getUserId(),
+                getEventId(r),
+                getRequesterId(r),
                 r.getStatus().name()
         );
+    }
+
+    public static Long getEventId(ParticipationRequest r) {
+        if (r.getEventId() != null) {
+            return r.getEventId();
+        }
+        return r.getEvent().getId();
+    }
+
+    public static Long getRequesterId(ParticipationRequest r) {
+        if (r.getRequesterId() != null) {
+            return r.getRequesterId();
+        }
+        return r.getRequester().getUserId();
     }
 }

@@ -56,8 +56,8 @@ public class ParticipationRequestInternalServiceImpl implements ParticipationReq
                         LinkedHashMap::new
                 ));
 
-        requestRepository.findAllByRequesterUserIdAndEventIdIn(userId, result.keySet().stream().toList())
-                .forEach(request -> result.put(request.getEvent().getId(), true));
+        requestRepository.findAllByRequesterIdAndEventIdIn(userId, result.keySet().stream().toList())
+                .forEach(request -> result.put(ParticipationRequestMapper.getEventId(request), true));
 
         return result;
     }

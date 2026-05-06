@@ -2,7 +2,6 @@ package ewm.request.service;
 
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
-import ewm.event.model.Event;
 import ewm.event.service.EventReferenceService;
 import ewm.request.dto.EventRequestStatusUpdateRequest;
 import ewm.request.dto.EventRequestStatusUpdateResult;
@@ -11,7 +10,6 @@ import ewm.request.mapper.ParticipationRequestMapper;
 import ewm.request.model.ParticipationRequest;
 import ewm.request.model.RequestStatus;
 import ewm.request.repository.ParticipationRequestRepository;
-import ewm.user.model.User;
 import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,9 +33,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional
     public ParticipationRequestDto create(Long userId, Long eventId) {
-        User user = userReferenceService.getExistingReference(userId);
+        ensureUserExists(userId);
         EventInternalDto eventData = eventReferenceService.getExistingEvent(eventId);
-        Event event = eventReferenceService.getExistingReference(eventId);
 
         if (Objects.equals(eventData.initiatorId(), userId)) {
             throw new ConflictException("Initiator cannot request own event");
@@ -45,7 +42,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (!"PUBLISHED".equals(eventData.state())) {
             throw new ConflictException("Event not published");
         }
-        if (requestRepo.existsByEventIdAndRequesterUserId(eventId, userId)) {
+        if (requestRepo.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new ConflictException("Duplicate request");
         }
 
@@ -57,16 +54,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         ParticipationRequest req = new ParticipationRequest();
-        req.setRequester(user);
-        req.setEvent(event);
-
-//        boolean moderation = event.getRequestModeration();
-//        if (!moderation && (limit == 0 || confirmed < limit)) {
-//            req.setStatus(RequestStatus.CONFIRMED);
-//            event.setConfirmedRequests(confirmed + 1);
-//        } else {
-//            req.setStatus(RequestStatus.PENDING);
-//        }
+        req.setRequesterId(userId);
+        req.setEventId(eventId);
 
         RequestStatus status;
         if (eventData.participantLimit() == 0 || Boolean.FALSE.equals(eventData.requestModeration())) {
@@ -91,11 +80,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
-        ParticipationRequest req = requestRepo.findByIdAndRequesterUserId(requestId, userId)
+        ParticipationRequest req = requestRepo.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
         if (req.getStatus() == RequestStatus.CONFIRMED) {
-            // Confirmed counts are calculated from request rows by request-service.
         }
 
         req.setStatus(RequestStatus.CANCELED);
@@ -106,7 +94,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         ensureUserExists(userId);
-        return requestRepo.findAllByRequesterUserId(userId).stream()
+        return requestRepo.findAllByRequesterId(userId).stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
