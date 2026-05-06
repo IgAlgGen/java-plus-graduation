@@ -8,7 +8,8 @@ import ewm.compilation.mapper.CompilationMapper;
 import ewm.compilation.model.Compilation;
 import ewm.compilation.repository.CompilationRepository;
 import ewm.event.model.Event;
-import ewm.event.repository.DatabaseEventRepository;
+import ewm.event.client.EventClient;
+import ewm.event.service.EventReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import ru.practicum.ewm.internal.dto.EventShortInternalDto;
+import ru.practicum.ewm.internal.dto.IdsRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +31,8 @@ import java.util.Set;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
-    private final DatabaseEventRepository eventRepository;
+    private final EventReferenceService eventReferenceService;
+    private final EventClient eventClient;
 
     @Override
     @Transactional
@@ -38,7 +45,7 @@ public class CompilationServiceImpl implements CompilationService {
         comp.setEvents(events);
 
         Compilation saved = compilationRepository.save(comp);
-        return CompilationMapper.toDto(saved);
+        return mapCompilation(saved);
     }
 
     @Override
@@ -58,7 +65,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Compilation saved = compilationRepository.save(comp);
-        return CompilationMapper.toDto(saved);
+        return mapCompilation(saved);
     }
 
     @Override
@@ -79,8 +86,9 @@ public class CompilationServiceImpl implements CompilationService {
                 ? compilationRepository.findAll(pageable).getContent()
                 : compilationRepository.findAllByPinned(pinned, pageable);
 
+        Map<Long, EventShortInternalDto> events = eventsById(comps);
         return comps.stream()
-                .map(CompilationMapper::toDto)
+                .map(comp -> CompilationMapper.toDto(comp, events))
                 .toList();
     }
 
@@ -89,7 +97,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto findById(Long compId) {
         Compilation comp = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Compilation not found: " + compId));
-        return CompilationMapper.toDto(comp);
+        return mapCompilation(comp);
     }
 
     private Set<Event> loadEvents(Set<Long> eventIds) {
@@ -97,12 +105,25 @@ public class CompilationServiceImpl implements CompilationService {
             return new HashSet<>();
         }
 
-        List<Event> events = eventRepository.findAllById(eventIds);
+        return new HashSet<>(eventReferenceService.getExistingReferences(eventIds));
+    }
 
-        if (events.size() != eventIds.size()) {
-            throw new NotFoundException("Some events not found");
+    private CompilationDto mapCompilation(Compilation compilation) {
+        return CompilationMapper.toDto(compilation, eventsById(List.of(compilation)));
+    }
+
+    private Map<Long, EventShortInternalDto> eventsById(List<Compilation> compilations) {
+        List<Long> ids = compilations.stream()
+                .flatMap(compilation -> compilation.getEvents().stream())
+                .map(Event::getId)
+                .distinct()
+                .toList();
+
+        if (ids.isEmpty()) {
+            return Map.of();
         }
 
-        return new HashSet<>(events);
+        return eventClient.getShortEvents(new IdsRequest(ids)).stream()
+                .collect(Collectors.toMap(EventShortInternalDto::id, Function.identity()));
     }
 }

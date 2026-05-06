@@ -33,7 +33,7 @@ spring:
         - id: feature-service-category-api
           uri: lb://feature-service
           predicates:
-            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
         - id: event-service-api
           uri: lb://event-service
           predicates:

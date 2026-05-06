@@ -25,7 +25,9 @@ public class EventInternalMapper {
                 event.getTitle(),
                 event.getAnnotation(),
                 event.getInitiator().getUserId(),
+                event.getInitiator().getName(),
                 event.getCategory().getId(),
+                event.getCategory().getName(),
                 event.getEventDate(),
                 event.getPaid()
         );

@@ -7,7 +7,9 @@ public record EventShortInternalDto(
         String title,
         String annotation,
         Long initiatorId,
+        String initiatorName,
         Long categoryId,
+        String categoryName,
         LocalDateTime eventDate,
         Boolean paid
 ) {
