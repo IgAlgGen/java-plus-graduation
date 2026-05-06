@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
+import ru.practicum.ewm.internal.dto.UserInternalDto;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 import ru.practicum.ewm.stats.dto.ViewStatsDto;
 
@@ -69,7 +70,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto get(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
-        if (!event.getInitiator().getUserId().equals(userId)) {
+        if (!EventMapper.getInitiatorId(event).equals(userId)) {
             throw new NotFoundException("Event not found");
         }
 
@@ -174,7 +175,7 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Event is already published");
         }
 
-        if (!currentEvent.getInitiator().getUserId().equals(userId)) {
+        if (!EventMapper.getInitiatorId(currentEvent).equals(userId)) {
             throw new BadRequestException("User not allowed to update event");
         }
 
@@ -286,12 +287,14 @@ public class EventServiceImpl implements EventService {
     private List<EventFullDto> mapToEventFullDto(List<Event> eventList) {
         Map<Long, Integer> views = getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
+        Map<Long, UserInternalDto> initiators = getInitiators(eventList);
 
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventFullDto(
                         e,
                         views.getOrDefault(e.getId(), 0),
-                        confirmed.getOrDefault(e.getId(), 0L)
+                        confirmed.getOrDefault(e.getId(), 0L),
+                        initiators.get(EventMapper.getInitiatorId(e))
                 ))
                 .toList();
     }
@@ -315,13 +318,27 @@ public class EventServiceImpl implements EventService {
     private List<EventShortDto> mapToEventShortDto(List<Event> eventList) {
         Map<Long, Integer> views = getEventsViews(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
+        Map<Long, UserInternalDto> initiators = getInitiators(eventList);
 
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventShortDto(
                         e,
                         views.getOrDefault(e.getId(), 0),
-                        confirmed.getOrDefault(e.getId(), 0L)
+                        confirmed.getOrDefault(e.getId(), 0L),
+                        initiators.get(EventMapper.getInitiatorId(e))
                 ))
                 .toList();
+    }
+
+    private Map<Long, UserInternalDto> getInitiators(List<Event> eventList) {
+        if (eventList == null || eventList.isEmpty()) return Map.of();
+
+        List<Long> ids = eventList.stream()
+                .map(EventMapper::getInitiatorId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        return userReferenceService.getUsersByIds(ids);
     }
 }

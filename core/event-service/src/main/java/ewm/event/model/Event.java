@@ -29,6 +29,9 @@ public class Event {
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
+    @Column(name = "initiator_id", insertable = false, updatable = false)
+    private Long initiatorId;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id")
     private Category category;

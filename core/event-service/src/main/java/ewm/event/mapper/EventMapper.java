@@ -8,8 +8,9 @@ import ewm.event.dto.*;
 import ewm.event.model.Event;
 import ewm.event.model.EventState;
 import ewm.event.model.EventStateAction;
-import ewm.user.mapper.UserMapper;
+import ewm.user.dto.UserShortDto;
 import ewm.user.model.User;
+import ru.practicum.ewm.internal.dto.UserInternalDto;
 
 public class EventMapper {
 
@@ -33,7 +34,10 @@ public class EventMapper {
         return event;
     }
 
-    public static EventFullDto mapToEventFullDto(Event event, long views, long confirmedRequests) {
+    public static EventFullDto mapToEventFullDto(Event event,
+                                                 long views,
+                                                 long confirmedRequests,
+                                                 UserInternalDto initiator) {
         EventFullDto eventFullDto = new EventFullDto();
         eventFullDto.setId(event.getId());
         eventFullDto.setTitle(event.getTitle());
@@ -43,7 +47,7 @@ public class EventMapper {
         eventFullDto.setCreatedOn(event.getCreatedOn());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setPublishedOn(event.getPublishedOn());
-        eventFullDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
+        eventFullDto.setInitiator(toUserShortDto(initiator, getInitiatorId(event)));
         LocationDto locationDto = new LocationDto();
         locationDto.setLat(event.getLocation().getLat());
         locationDto.setLon(event.getLocation().getLon());
@@ -60,7 +64,10 @@ public class EventMapper {
         return eventFullDto;
     }
 
-    public static EventShortDto mapToEventShortDto(Event event, long views, long confirmedRequests) {
+    public static EventShortDto mapToEventShortDto(Event event,
+                                                   long views,
+                                                   long confirmedRequests,
+                                                   UserInternalDto initiator) {
         EventShortDto eventShortDto = new EventShortDto();
         eventShortDto.setId(event.getId());
         eventShortDto.setTitle(event.getTitle());
@@ -71,9 +78,23 @@ public class EventMapper {
         eventShortDto.setConfirmedRequests(confirmedRequests);
         eventShortDto.setViews(views);
         eventShortDto.setEventDate(event.getEventDate());
-        eventShortDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
+        eventShortDto.setInitiator(toUserShortDto(initiator, getInitiatorId(event)));
         eventShortDto.setPaid(event.getPaid());
         return eventShortDto;
+    }
+
+    public static Long getInitiatorId(Event event) {
+        if (event.getInitiatorId() != null) {
+            return event.getInitiatorId();
+        }
+        return event.getInitiator() == null ? null : event.getInitiator().getUserId();
+    }
+
+    private static UserShortDto toUserShortDto(UserInternalDto user, Long fallbackId) {
+        UserShortDto dto = new UserShortDto();
+        dto.setId(user == null ? fallbackId : user.id());
+        dto.setName(user == null ? null : user.name());
+        return dto;
     }
 
     public static Event updateEvent(Event event, UpdateEventUserRequest updateEventUserRequest) {

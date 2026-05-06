@@ -2,13 +2,16 @@ package ewm.event.service;
 
 import ewm.common.exception.NotFoundException;
 import ewm.event.mapper.EventInternalMapper;
+import ewm.event.mapper.EventMapper;
 import ewm.event.model.Event;
 import ewm.event.repository.DatabaseEventRepository;
+import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.internal.dto.EventInternalDto;
 import ru.practicum.ewm.internal.dto.EventShortInternalDto;
+import ru.practicum.ewm.internal.dto.UserInternalDto;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class EventInternalServiceImpl implements EventInternalService {
 
     private final DatabaseEventRepository eventRepository;
+    private final UserReferenceService userReferenceService;
 
     @Override
     @Transactional(readOnly = true)
@@ -68,8 +72,18 @@ public class EventInternalServiceImpl implements EventInternalService {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
-        return eventRepository.findAllById(ids).stream()
-                .map(EventInternalMapper::toShortInternalDto)
+        List<Event> events = eventRepository.findAllById(ids);
+        Map<Long, UserInternalDto> initiators = userReferenceService.getUsersByIds(events.stream()
+                .map(EventMapper::getInitiatorId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList());
+
+        return events.stream()
+                .map(event -> EventInternalMapper.toShortInternalDto(
+                        event,
+                        initiators.get(EventMapper.getInitiatorId(event))
+                ))
                 .toList();
     }
 
