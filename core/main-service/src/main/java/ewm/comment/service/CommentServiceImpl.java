@@ -13,7 +13,7 @@ import ewm.event.model.Event;
 import ewm.event.model.EventState;
 import ewm.event.repository.EventRepository;
 import ewm.user.model.User;
-import ewm.user.repository.UserRepository;
+import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,14 +27,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final UserReferenceService userReferenceService;
     private final EventRepository eventRepository;
 
     @Override
     @Transactional
     public CommentDto create(Long userId, Long eventId, NewCommentDto newCommentDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        User user = userReferenceService.getExistingReference(userId);
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));

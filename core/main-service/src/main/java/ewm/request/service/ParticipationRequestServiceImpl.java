@@ -13,7 +13,7 @@ import ewm.request.model.ParticipationRequest;
 import ewm.request.model.RequestStatus;
 import ewm.request.repository.ParticipationRequestRepository;
 import ewm.user.model.User;
-import ewm.user.repository.UserRepository;
+import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,14 +29,13 @@ import java.util.stream.Collectors;
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final ParticipationRequestRepository requestRepo;
-    private final UserRepository userRepo;
+    private final UserReferenceService userReferenceService;
     private final EventRepository eventRepo;
 
     @Override
     @Transactional
     public ParticipationRequestDto create(Long userId, Long eventId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        User user = userReferenceService.getExistingReference(userId);
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
 
@@ -200,8 +199,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     private void ensureUserExists(Long userId) {
-        if (!userRepo.existsById(userId)) {
-            throw new NotFoundException("User not found: " + userId);
-        }
+        userReferenceService.ensureExists(userId);
     }
 }

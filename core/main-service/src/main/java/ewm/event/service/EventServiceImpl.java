@@ -16,7 +16,7 @@ import ewm.event.repository.DatabaseEventSearchRepository;
 import ewm.event.repository.EventRepository;
 import ewm.request.repository.ParticipationRequestRepository;
 import ewm.user.model.User;
-import ewm.user.repository.UserRepository;
+import ewm.user.service.UserReferenceService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +36,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
-    private final UserRepository userRepository;
+    private final UserReferenceService userReferenceService;
     private final EventRepository eventRepository;
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
     private final CategoryRepository categoryRepository;
@@ -48,8 +48,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto create(Long userId, NewEventDto eventDto) {
         isEventTimeValid(eventDto.getEventDate());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userReferenceService.getExistingReference(userId);
 
         Category category = categoryRepository.findById(eventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Category not found"));
@@ -113,8 +112,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        userReferenceService.ensureExists(userId);
 
         Pageable page = PageRequest.of(from / size, size);
 
