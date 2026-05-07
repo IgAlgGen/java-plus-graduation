@@ -51,7 +51,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto update(Long compId, UpdateCompilationRequest dto) {
         Compilation comp = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Compilation not found: " + compId));
+                .orElseThrow(() -> new NotFoundException("Подборка с id=" + compId + " не найдена"));
 
         if (dto.getTitle() != null) {
             comp.setTitle(dto.getTitle());
@@ -71,7 +71,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public void delete(Long compId) {
         if (!compilationRepository.existsById(compId)) {
-            throw new NotFoundException("Compilation not found: " + compId);
+            throw new NotFoundException("Подборка с id=" + compId + " не найдена");
         }
         compilationRepository.deleteById(compId);
     }
@@ -95,7 +95,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional(readOnly = true)
     public CompilationDto findById(Long compId) {
         Compilation comp = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Compilation not found: " + compId));
+                .orElseThrow(() -> new NotFoundException("Подборка с id=" + compId + " не найдена"));
         return mapCompilation(comp);
     }
 

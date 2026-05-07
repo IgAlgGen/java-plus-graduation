@@ -22,6 +22,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import ru.practicum.ewm.internal.dto.EventInternalDto;
 
+/**
+ * Реализация правил подачи и модерации заявок на участие.
+ *
+ * <p>Сервис проверяет публикацию события, запрет заявок от инициатора, уникальность заявки
+ * и лимит участников с учетом автоматического подтверждения.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
@@ -37,20 +43,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         EventInternalDto eventData = eventReferenceService.getExistingEvent(eventId);
 
         if (Objects.equals(eventData.initiatorId(), userId)) {
-            throw new ConflictException("Initiator cannot request own event");
+            throw new ConflictException("Инициатор не может подать заявку на участие в своем событии");
         }
         if (!"PUBLISHED".equals(eventData.state())) {
-            throw new ConflictException("Event not published");
+            throw new ConflictException("Событие не опубликовано");
         }
         if (requestRepo.existsByEventIdAndRequesterId(eventId, userId)) {
-            throw new ConflictException("Duplicate request");
+            throw new ConflictException("Заявка на участие уже существует");
         }
 
         long limit = eventData.participantLimit();
         long confirmed = requestRepo.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         if (limit > 0 && confirmed >= limit) {
-            throw new ConflictException("Participant limit reached");
+            throw new ConflictException("Достигнут лимит участников");
         }
 
         ParticipationRequest req = new ParticipationRequest();
@@ -69,7 +75,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (status == RequestStatus.CONFIRMED && limit > 0) {
             long confirmedAfter = requestRepo.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
             if (confirmedAfter >= limit) {
-                throw new ConflictException("Participant limit reached");
+                throw new ConflictException("Достигнут лимит участников");
             }
         }
 
@@ -81,7 +87,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
         ParticipationRequest req = requestRepo.findByIdAndRequesterId(requestId, userId)
-                .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
+                .orElseThrow(() -> new NotFoundException("Заявка с id=" + requestId + " не найдена"));
 
         if (req.getStatus() == RequestStatus.CONFIRMED) {
         }
@@ -104,7 +110,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         EventInternalDto eventData = eventReferenceService.getExistingEvent(eventId);
         if (!Objects.equals(eventData.initiatorId(), userId)) {
-            throw new ConflictException("Only initiator can view event requests");
+            throw new ConflictException("Только инициатор может просматривать заявки на событие");
         }
         return requestRepo.findAllByEventId(eventId).stream()
                 .map(ParticipationRequestMapper::toDto)
@@ -122,19 +128,19 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         EventInternalDto eventData = eventReferenceService.getExistingEvent(eventId);
 
         if (!Objects.equals(eventData.initiatorId(), userId)) {
-            throw new ConflictException("Only initiator can update requests");
+            throw new ConflictException("Только инициатор может изменять заявки на событие");
         }
 
         List<ParticipationRequest> requests =
                 requestRepo.findAllByIdInAndEventId(requestIds, eventId);
 
         if (requests.size() != new HashSet<>(requestIds).size()) {
-            throw new NotFoundException("Some requests not found for event");
+            throw new NotFoundException("Некоторые заявки для события не найдены");
         }
 
         for (ParticipationRequest r : requests) {
             if (r.getStatus() != RequestStatus.PENDING) {
-                throw new ConflictException("Only PENDING requests can be updated");
+                throw new ConflictException("Можно изменять только заявки в статусе ожидания");
             }
         }
 
@@ -154,7 +160,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         long confirmed = requestRepo.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         if (limit > 0 && confirmed >= limit) {
-            throw new ConflictException("Participant limit reached");
+            throw new ConflictException("Достигнут лимит участников");
         }
 
         long slots = (limit == 0) ? Long.MAX_VALUE : (limit - confirmed);

@@ -4,6 +4,9 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 import ru.practicum.stats.model.EndpointHitEntity;
 
+/**
+ * Маппер посещений между DTO внешнего API статистики и JPA-сущностью.
+ */
 @UtilityClass
 public class EndpointHitMapper {
     public static EndpointHitEntity toEntity(EndpointHitDto hit) {

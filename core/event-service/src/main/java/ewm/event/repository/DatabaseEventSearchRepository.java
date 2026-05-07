@@ -12,11 +12,25 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Репозиторий динамического поиска событий через Querydsl.
+ */
 @Repository
 @AllArgsConstructor
 public class DatabaseEventSearchRepository {
     private final JPAQueryFactory queryFactory;
 
+    /**
+     * Ищет события для административного API по независимым необязательным фильтрам.
+     *
+     * @param users идентификаторы инициаторов
+     * @param states состояния событий
+     * @param categories идентификаторы категорий
+     * @param rangeStart начало диапазона дат
+     * @param rangeEnd конец диапазона дат
+     * @param pageable параметры смещения и размера страницы
+     * @return найденные события
+     */
     public List<Event> findForAdmin(List<Long> users,
                                     List<EventState> states,
                                     List<Long> categories,
@@ -55,6 +69,21 @@ public class DatabaseEventSearchRepository {
                 .fetch();
     }
 
+    /**
+     * Ищет опубликованные события для публичного API.
+     *
+     * <p>Текст ищется в аннотации и описании без учета регистра; фильтр доступности исключает
+     * события с заполненным лимитом участников.</p>
+     *
+     * @param text текст поиска
+     * @param categories идентификаторы категорий
+     * @param paid фильтр платности
+     * @param rangeStart начало диапазона дат
+     * @param rangeEnd конец диапазона дат
+     * @param onlyAvailable признак поиска событий со свободными местами
+     * @param pageable параметры смещения и размера страницы
+     * @return найденные опубликованные события
+     */
     public List<Event> findPublicEvents(String text,
                                         List<Long> categories,
                                         Boolean paid,

@@ -24,7 +24,7 @@ public class CategoryInternalServiceImpl implements CategoryInternalService {
     @Transactional(readOnly = true)
     public CategoryInternalDto getCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Category not found: " + categoryId));
+                .orElseThrow(() -> new NotFoundException("Категория с id=" + categoryId + " не найдена"));
         return CategoryInternalMapper.toInternalDto(category);
     }
 

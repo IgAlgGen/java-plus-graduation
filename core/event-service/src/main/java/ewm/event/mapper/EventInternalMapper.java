@@ -6,6 +6,9 @@ import ru.practicum.ewm.internal.dto.EventShortInternalDto;
 import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 
+/**
+ * Маппер внутренних представлений события для межсервисного API.
+ */
 public class EventInternalMapper {
 
     public static EventInternalDto toInternalDto(Event event) {

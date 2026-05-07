@@ -11,6 +11,12 @@ import ewm.user.dto.UserShortDto;
 import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 
+/**
+ * Маппер внешних DTO событий.
+ *
+ * <p>При создании события подставляет значения по умолчанию: бесплатное участие,
+ * отсутствие лимита участников и включенную модерацию заявок.</p>
+ */
 public class EventMapper {
 
     public static Event mapToEvent(Long initiatorId,

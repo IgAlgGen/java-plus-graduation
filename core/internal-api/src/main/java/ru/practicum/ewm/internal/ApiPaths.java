@@ -1,5 +1,10 @@
 package ru.practicum.ewm.internal;
 
+/**
+ * Единый набор путей внутреннего HTTP API между микросервисами.
+ *
+ * <p>Константы используются и клиентами, и контроллерами, чтобы не дублировать строковые контракты.</p>
+ */
 public final class ApiPaths {
     public static final String INTERNAL_PREFIX = "/internal";
 

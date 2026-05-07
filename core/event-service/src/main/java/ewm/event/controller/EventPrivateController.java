@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST-контроллер личного кабинета инициатора событий.
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +25,13 @@ import java.util.List;
 public class EventPrivateController {
     private final EventService eventService;
 
+    /**
+     * Создает событие пользователя.
+     *
+     * @param userId идентификатор инициатора
+     * @param newEventDto данные события
+     * @return созданное событие
+     */
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(@PathVariable Long userId,
@@ -29,6 +39,13 @@ public class EventPrivateController {
         return eventService.create(userId, newEventDto);
     }
 
+    /**
+     * Возвращает событие, принадлежащее пользователю.
+     *
+     * @param userId идентификатор инициатора
+     * @param eventId идентификатор события
+     * @return полная информация о событии
+     */
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto get(@PathVariable Long userId,
@@ -36,6 +53,14 @@ public class EventPrivateController {
         return eventService.get(userId, eventId);
     }
 
+    /**
+     * Возвращает события пользователя.
+     *
+     * @param userId идентификатор инициатора
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return краткая информация о событиях
+     */
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getEvents(@PathVariable Long userId,
@@ -44,6 +69,14 @@ public class EventPrivateController {
         return eventService.getEvents(userId, from, size);
     }
 
+    /**
+     * Обновляет событие пользователем-инициатором.
+     *
+     * @param userId идентификатор инициатора
+     * @param eventId идентификатор события
+     * @param updateEventUserRequest изменяемые поля
+     * @return обновленное событие
+     */
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto update(@PathVariable Long userId,

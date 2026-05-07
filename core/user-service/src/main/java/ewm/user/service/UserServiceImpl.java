@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void delete(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User with id=" + userId + " was not found");
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         userRepository.deleteById(userId);
     }
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserInternalDto getInternalUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
         return UserMapper.toInternalDto(user);
     }
 

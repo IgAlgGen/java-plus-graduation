@@ -24,6 +24,12 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
 
     List<ParticipationRequest> findAllByIdInAndEventId(Collection<Long> ids, Long eventId);
 
+    /**
+     * Считает подтвержденные заявки для набора событий.
+     *
+     * @param eventIds идентификаторы событий
+     * @return проекции с количеством подтвержденных заявок по каждому событию
+     */
     @Query("""
            select r.eventId as eventId, count(r.id) as cnt
            from ParticipationRequest r
@@ -32,6 +38,9 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
            """)
     List<EventConfirmedCount> countConfirmedByEventIds(@Param("eventIds") List<Long> eventIds);
 
+    /**
+     * Проекция результата подсчета подтвержденных заявок по событию.
+     */
     interface EventConfirmedCount {
         Long getEventId();
 

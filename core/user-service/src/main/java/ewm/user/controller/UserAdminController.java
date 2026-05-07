@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Административный REST-контроллер пользователей.
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -21,12 +24,26 @@ public class UserAdminController {
 
     private final UserService userService;
 
+    /**
+     * Регистрирует пользователя.
+     *
+     * @param request данные нового пользователя
+     * @return созданный пользователь
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto registerUser(@Valid @RequestBody NewUserRequest request) {
         return userService.create(request);
     }
 
+    /**
+     * Возвращает пользователей по идентификаторам или страницу всех пользователей.
+     *
+     * @param ids необязательный список идентификаторов
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return список пользователей
+     */
     @GetMapping
     public List<UserDto> getUsers(
             @RequestParam(required = false) List<Long> ids,
@@ -36,6 +53,11 @@ public class UserAdminController {
         return userService.getUsers(ids, from, size);
     }
 
+    /**
+     * Удаляет пользователя.
+     *
+     * @param userId идентификатор пользователя
+     */
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long userId) {

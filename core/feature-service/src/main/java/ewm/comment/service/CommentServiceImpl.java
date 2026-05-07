@@ -20,6 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация правил модерации комментариев.
+ *
+ * <p>Новые и отредактированные комментарии получают статус {@code NEW};
+ * публичные выборки возвращают только одобренные комментарии.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
@@ -46,10 +52,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto update(Long userId, Long commentId, UpdateCommentRequest updateCommentRequest) {
         Comment comment = commentRepository.findByIdAndAuthorId(commentId, userId)
-                .orElseThrow(() -> new NotFoundException("Comment not found: " + commentId));
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
 
         if (comment.getStatus() == CommentStatus.REJECTED) {
-            throw new ConflictException("Cannot update rejected comment");
+            throw new ConflictException("Нельзя редактировать отклоненный комментарий");
         }
 
         CommentMapper.updateComment(comment, updateCommentRequest);
@@ -87,7 +93,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void delete(Long userId, Long commentId) {
         Comment comment = commentRepository.findByIdAndAuthorId(commentId, userId)
-                .orElseThrow(() -> new NotFoundException("Comment not found: " + commentId));
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
 
         commentRepository.delete(comment);
     }
@@ -96,7 +102,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto approve(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found: " + commentId));
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
 
         comment.setStatus(CommentStatus.APPROVED);
         Comment saved = commentRepository.save(comment);
@@ -107,7 +113,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto reject(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found: " + commentId));
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
 
         comment.setStatus(CommentStatus.REJECTED);
         Comment saved = commentRepository.save(comment);

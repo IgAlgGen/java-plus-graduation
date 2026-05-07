@@ -4,6 +4,9 @@ import ewm.request.dto.ParticipationRequestDto;
 import ewm.request.model.ParticipationRequest;
 import ru.practicum.ewm.internal.dto.ParticipationRequestInternalDto;
 
+/**
+ * Маппер заявок на участие для внешнего и внутреннего API.
+ */
 public final class ParticipationRequestMapper {
 
     private ParticipationRequestMapper() {

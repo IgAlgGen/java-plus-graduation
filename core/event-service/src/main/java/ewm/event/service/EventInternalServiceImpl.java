@@ -32,7 +32,7 @@ public class EventInternalServiceImpl implements EventInternalService {
     @Transactional(readOnly = true)
     public EventInternalDto getEvent(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено"));
         return EventInternalMapper.toInternalDto(event);
     }
 

@@ -5,6 +5,9 @@ import ewm.comment.dto.NewCommentDto;
 import ewm.comment.dto.UpdateCommentRequest;
 import ewm.comment.model.Comment;
 
+/**
+ * Маппер комментариев между сущностью и внешними DTO.
+ */
 public final class CommentMapper {
 
     private CommentMapper() {

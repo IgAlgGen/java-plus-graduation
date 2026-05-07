@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Публичный REST-контроллер чтения подборок событий.
+ */
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -18,6 +21,14 @@ public class PublicCompilationController {
 
     private final CompilationService compilationService;
 
+    /**
+     * Возвращает подборки с необязательным фильтром закрепления.
+     *
+     * @param pinned признак закрепления; {@code null} означает без фильтра
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return список подборок
+     */
     @GetMapping
     public List<CompilationDto> findAll(@RequestParam(required = false) Boolean pinned,
                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
@@ -25,6 +36,12 @@ public class PublicCompilationController {
         return compilationService.findAll(pinned, from, size);
     }
 
+    /**
+     * Возвращает подборку по идентификатору.
+     *
+     * @param compId идентификатор подборки
+     * @return подборка
+     */
     @GetMapping("/{compId}")
     public CompilationDto findById(@PathVariable Long compId) {
         return compilationService.findById(compId);

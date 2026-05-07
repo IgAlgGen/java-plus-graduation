@@ -10,6 +10,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EndpointHitRepository extends JpaRepository<EndpointHitEntity, Long> {
+    /**
+     * Считает все посещения по приложениям и URI за период с необязательным ограничением по URI.
+     *
+     * @param start начало периода включительно
+     * @param end конец периода включительно
+     * @param uris URI для фильтрации; {@code null} означает отсутствие фильтра
+     * @return статистика, отсортированная по количеству посещений по убыванию
+     */
     @Query("select new ru.practicum.ewm.stats.dto.ViewStatsDto(h.app, h.uri, count(h.id)) "
             + "from EndpointHitEntity h "
             + "where h.timestamp between :start and :end "
@@ -20,6 +28,14 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHitEntity, 
                                  @Param("end") LocalDateTime end,
                                  @Param("uris") List<String> uris);
 
+    /**
+     * Считает уникальные посещения по IP-адресу для каждого приложения и URI.
+     *
+     * @param start начало периода включительно
+     * @param end конец периода включительно
+     * @param uris URI для фильтрации; {@code null} означает отсутствие фильтра
+     * @return статистика уникальных просмотров, отсортированная по количеству по убыванию
+     */
     @Query("select new ru.practicum.ewm.stats.dto.ViewStatsDto(h.app, h.uri, count(distinct h.ip)) "
             + "from EndpointHitEntity h "
             + "where h.timestamp between :start and :end "

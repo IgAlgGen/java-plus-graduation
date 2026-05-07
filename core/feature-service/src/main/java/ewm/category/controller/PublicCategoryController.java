@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Публичный REST-контроллер чтения категорий.
+ */
 @Validated
 @RestController
 @RequestMapping("/categories")
@@ -21,12 +24,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicCategoryController {
     private final CategoryService categoryService;
 
+    /**
+     * Возвращает страницу категорий.
+     *
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return список категорий
+     */
     @GetMapping
     public List<CategoryDto> findAll(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                      @RequestParam(defaultValue = "10") @Positive Integer size) {
         return categoryService.findAll(from, size);
     }
 
+    /**
+     * Возвращает категорию по идентификатору.
+     *
+     * @param catId идентификатор категории
+     * @return категория
+     */
     @GetMapping("/{catId}")
     public CategoryDto findById(@PathVariable Long catId) {
         return categoryService.findById(catId);

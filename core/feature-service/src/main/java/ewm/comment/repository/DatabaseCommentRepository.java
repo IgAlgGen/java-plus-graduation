@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JPA-репозиторий комментариев с сортировкой выборок от новых к старым.
+ */
 public interface DatabaseCommentRepository extends CommentRepository, JpaRepository<Comment, Long> {
     @Override
     @Query("SELECT c FROM Comment c WHERE c.eventId = :eventId ORDER BY c.createdOn DESC")

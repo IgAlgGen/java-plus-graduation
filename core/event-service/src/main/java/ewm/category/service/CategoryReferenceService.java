@@ -38,7 +38,7 @@ public class CategoryReferenceService {
 
     public void ensureExists(Long categoryId) {
         if (!exists(categoryId)) {
-            throw new NotFoundException("Category not found");
+            throw new NotFoundException("Категория не найдена");
         }
     }
 }

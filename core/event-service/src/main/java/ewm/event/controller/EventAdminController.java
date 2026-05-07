@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Административный REST-контроллер событий.
+ */
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -23,6 +26,18 @@ import java.util.List;
 public class EventAdminController {
     private final EventService eventService;
 
+    /**
+     * Ищет события по административным фильтрам.
+     *
+     * @param users идентификаторы инициаторов
+     * @param states состояния событий
+     * @param categories идентификаторы категорий
+     * @param rangeStart начало диапазона дат события
+     * @param rangeEnd конец диапазона дат события
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return найденные события
+     */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<EventFullDto> get(@RequestParam(required = false) List<Long> users,
@@ -37,6 +52,13 @@ public class EventAdminController {
         return eventService.get(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
+    /**
+     * Обновляет событие от имени администратора.
+     *
+     * @param eventId идентификатор события
+     * @param updateEventAdminRequest изменяемые поля и административное действие
+     * @return обновленное событие
+     */
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto update(@PathVariable Long eventId,

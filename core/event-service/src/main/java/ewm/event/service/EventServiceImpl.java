@@ -33,6 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Реализация бизнес-правил работы с событиями.
+ *
+ * <p>Создание и пользовательское обновление требуют дату события минимум через два часа.
+ * Публичные методы возвращают только опубликованные события и отправляют обращения в сервис статистики.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
@@ -65,9 +71,9 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventFullDto get(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
         if (!EventMapper.getInitiatorId(event).equals(userId)) {
-            throw new NotFoundException("Event not found");
+            throw new NotFoundException("Событие не найдено");
         }
 
         List<Event> eventList = List.of(event);
@@ -95,10 +101,10 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventFullDto getPublicEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new NotFoundException("Event is not published");
+            throw new NotFoundException("Событие не опубликовано");
         }
 
         List<Event> eventList = List.of(event);
@@ -134,7 +140,7 @@ public class EventServiceImpl implements EventService {
 
         if (rangeStart == null) rangeStart = LocalDateTime.now();
         if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
-            throw new BadRequestException("Range start must be before rangeEnd");
+            throw new BadRequestException("Дата начала диапазона должна быть раньше даты окончания");
         }
 
         // Pageable: сортировка только по eventDate, не по views
@@ -165,14 +171,14 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
         Event currentEvent = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
 
         if (currentEvent.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Event is already published");
+            throw new ConflictException("Событие уже опубликовано");
         }
 
         if (!EventMapper.getInitiatorId(currentEvent).equals(userId)) {
-            throw new BadRequestException("User not allowed to update event");
+            throw new BadRequestException("Пользователь не может редактировать это событие");
         }
 
         Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventUserRequest);
@@ -196,12 +202,12 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto update(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event currentEvent = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
 
         if (currentEvent.getState().equals(EventState.PUBLISHED) &&
                 updateEventAdminRequest.getEventDate() != null &&
                 updateEventAdminRequest.getEventDate().isAfter(currentEvent.getPublishedOn().minusHours(1))) {
-            throw new ConflictException("Invalid event time");
+            throw new ConflictException("Некорректное время события");
         }
 
         if (updateEventAdminRequest.getStateAction() != null) {
@@ -213,7 +219,7 @@ public class EventServiceImpl implements EventService {
                     currentEvent.setState(EventState.CANCELED);
                 }
             } else {
-                throw new ConflictException("Invalid event state");
+                throw new ConflictException("Некорректный статус события");
             }
         }
 
@@ -234,7 +240,7 @@ public class EventServiceImpl implements EventService {
 
     private void isEventTimeValid(LocalDateTime eventTime) {
         if (eventTime.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new BadRequestException("Invalid event time");
+            throw new BadRequestException("Некорректное время события");
         }
     }
 

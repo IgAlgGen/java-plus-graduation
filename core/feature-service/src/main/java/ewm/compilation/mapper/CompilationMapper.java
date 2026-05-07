@@ -9,6 +9,12 @@ import ru.practicum.ewm.internal.dto.EventShortInternalDto;
 
 import java.util.Map;
 
+/**
+ * Маппер подборок событий.
+ *
+ * <p>Внешний DTO подборки собирается из локальной подборки и кратких данных событий,
+ * полученных из event-service.</p>
+ */
 public class CompilationMapper {
 
     public static CompilationDto toDto(Compilation c, Map<Long, EventShortInternalDto> events) {

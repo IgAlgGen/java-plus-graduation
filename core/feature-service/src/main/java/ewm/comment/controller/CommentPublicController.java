@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Публичный REST-контроллер чтения одобренных комментариев.
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,14 @@ import java.util.List;
 public class CommentPublicController {
     private final CommentService commentService;
 
+    /**
+     * Возвращает одобренные комментарии события.
+     *
+     * @param eventId идентификатор события
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return список комментариев события
+     */
     @GetMapping("/events/{eventId}/comments")
     @ResponseStatus(HttpStatus.OK)
     public List<CommentDto> getEventComments(@PathVariable Long eventId,
@@ -26,6 +37,13 @@ public class CommentPublicController {
         return commentService.getEventComments(eventId, from, size);
     }
 
+    /**
+     * Возвращает одобренные комментарии по всем событиям.
+     *
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @return список комментариев
+     */
     @GetMapping("/comments")
     @ResponseStatus(HttpStatus.OK)
     public List<CommentDto> getComments(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,

@@ -4,12 +4,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Запрос пользователя на обновление комментария.
+ */
 @Data
 public class UpdateCommentRequest {
     public UpdateCommentRequest(String value) {
         this.text = value;
     }
 
+    /** Новый текст комментария; обязательное непустое значение от 1 до 5000 символов. */
     @NotBlank
     @Size(min = 1, max = 5000)
     private String text;

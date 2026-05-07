@@ -23,7 +23,7 @@ public class EventReferenceService {
     public void ensurePublished(Long eventId) {
         EventInternalDto event = eventClient.getEvent(eventId);
         if (!"PUBLISHED".equals(event.state())) {
-            throw new ewm.common.exception.ConflictException("Comments can only be added to published events");
+            throw new ewm.common.exception.ConflictException("Комментарии можно добавлять только к опубликованным событиям");
         }
     }
 
@@ -35,7 +35,7 @@ public class EventReferenceService {
         Map<Long, Boolean> existing = eventClient.existsEvents(new IdsRequest(eventIds.stream().toList()));
         boolean allExist = eventIds.stream().allMatch(id -> Boolean.TRUE.equals(existing.get(id)));
         if (!allExist) {
-            throw new NotFoundException("Some events not found");
+            throw new NotFoundException("Некоторые события не найдены");
         }
     }
 }

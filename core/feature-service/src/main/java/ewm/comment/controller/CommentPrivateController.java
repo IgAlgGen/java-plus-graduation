@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST-контроллер пользовательских операций с комментариями.
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,14 @@ import org.springframework.web.bind.annotation.*;
 public class CommentPrivateController {
     private final CommentService commentService;
 
+    /**
+     * Создает комментарий к опубликованному событию.
+     *
+     * @param userId идентификатор автора
+     * @param eventId идентификатор события
+     * @param newCommentDto текст комментария
+     * @return созданный комментарий
+     */
     @PostMapping("/events/{eventId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto create(@PathVariable Long userId,
@@ -26,6 +37,14 @@ public class CommentPrivateController {
         return commentService.create(userId, eventId, newCommentDto);
     }
 
+    /**
+     * Обновляет комментарий автора.
+     *
+     * @param userId идентификатор автора
+     * @param commentId идентификатор комментария
+     * @param updateCommentRequest новый текст
+     * @return обновленный комментарий
+     */
     @PatchMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.OK)
     public CommentDto update(@PathVariable Long userId,
@@ -34,6 +53,12 @@ public class CommentPrivateController {
         return commentService.update(userId, commentId, updateCommentRequest);
     }
 
+    /**
+     * Удаляет комментарий автора.
+     *
+     * @param userId идентификатор автора
+     * @param commentId идентификатор комментария
+     */
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long userId,

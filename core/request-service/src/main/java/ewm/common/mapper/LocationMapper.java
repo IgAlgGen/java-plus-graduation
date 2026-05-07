@@ -7,7 +7,7 @@ import ewm.common.model.Location;
 public class LocationMapper {
     public static Location mapLocation(LocationDto dto) {
         if (dto == null || dto.getLat() == null || dto.getLon() == null) {
-            throw new BadRequestException("Location is required");
+            throw new BadRequestException("Место проведения обязательно");
         }
         Location l = new Location();
         l.setLat(dto.getLat());

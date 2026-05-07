@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.util.Set;
 
+/**
+ * Представление подборки событий во внешнем API.
+ */
 @Data
 @Getter
 @Setter
@@ -14,8 +17,11 @@ import java.util.Set;
 @Builder
 public class CompilationDto {
     private Long id;
+    /** Заголовок подборки до 50 символов. */
     @Size(max = 50)
     private String title;
+    /** Признак закрепления подборки. */
     private Boolean pinned;
+    /** События, входящие в подборку. */
     private Set<EventShortDto> events;
 }

@@ -17,7 +17,7 @@ public class UserReferenceService {
 
     public void ensureExists(Long userId) {
         if (!exists(userId)) {
-            throw new NotFoundException("User not found: " + userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
     }
 

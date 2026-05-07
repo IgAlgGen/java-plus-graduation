@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Публичный REST-контроллер опубликованных событий.
+ */
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -22,12 +25,34 @@ import java.util.List;
 public class EventPublicController {
     private final EventService eventService;
 
+    /**
+     * Возвращает опубликованное событие и учитывает просмотр.
+     *
+     * @param eventId идентификатор события
+     * @param request HTTP-запрос для регистрации статистики
+     * @return полная информация о событии
+     */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getPublicEvent(@PathVariable("id") Long eventId, HttpServletRequest request) {
         return eventService.getPublicEvent(eventId, request);
     }
 
+    /**
+     * Ищет опубликованные события по публичным фильтрам и учитывает просмотр списка.
+     *
+     * @param text текст поиска по аннотации и описанию
+     * @param categories идентификаторы категорий
+     * @param paid фильтр платности
+     * @param rangeStart начало диапазона дат события
+     * @param rangeEnd конец диапазона дат события
+     * @param onlyAvailable признак поиска событий со свободными местами
+     * @param sort сортировка результата
+     * @param from смещение первого результата
+     * @param size размер страницы
+     * @param request HTTP-запрос для регистрации статистики
+     * @return краткая информация о найденных событиях
+     */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getPublicEvents(@RequestParam(required = false) String text,

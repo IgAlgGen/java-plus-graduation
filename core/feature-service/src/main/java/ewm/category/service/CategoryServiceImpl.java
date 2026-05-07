@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не была найдена"));
 
         if (Boolean.TRUE.equals(eventClient.existsByCategory(id))) {
-            throw new ConflictException("Category is not empty");
+            throw new ConflictException("Категория содержит события и не может быть удалена");
         }
 
         categoryRepository.delete(category);

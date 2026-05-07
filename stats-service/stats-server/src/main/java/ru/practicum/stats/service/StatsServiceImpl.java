@@ -14,6 +14,11 @@ import ru.practicum.stats.repository.EndpointHitRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Реализация сервиса статистики на базе хранилища посещений.
+ *
+ * <p>При расчете статистики пустой фильтр URI трактуется как отсутствие ограничения по URI.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,7 +37,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         if (end.isBefore(start)) {
-            throw new BadRequestException("Range start date is before end date");
+            throw new BadRequestException("Дата начала диапазона должна быть раньше даты окончания");
         }
         List<String> filterUris = (uris == null || uris.isEmpty()) ? null : uris;
         if (unique) {
