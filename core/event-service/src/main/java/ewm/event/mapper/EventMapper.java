@@ -1,7 +1,6 @@
 package ewm.event.mapper;
 
 import ewm.category.dto.CategoryDto;
-import ewm.category.model.Category;
 import ewm.common.dto.LocationDto;
 import ewm.common.model.Location;
 import ewm.event.dto.*;
@@ -9,21 +8,20 @@ import ewm.event.model.Event;
 import ewm.event.model.EventState;
 import ewm.event.model.EventStateAction;
 import ewm.user.dto.UserShortDto;
-import ewm.user.model.User;
 import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
 
 public class EventMapper {
 
-    public static Event mapToEvent(User initiator,
+    public static Event mapToEvent(Long initiatorId,
                                    NewEventDto eventDto,
-                                   Category category) {
+                                   Long categoryId) {
         Event event = new Event();
-        event.setInitiator(initiator);
+        event.setInitiatorId(initiatorId);
         event.setTitle(eventDto.getTitle());
         event.setAnnotation(eventDto.getAnnotation());
         event.setDescription(eventDto.getDescription());
-        event.setCategory(category);
+        event.setCategoryId(categoryId);
         event.setEventDate(eventDto.getEventDate());
         Location location = new Location();
         location.setLat(eventDto.getLocation().getLat());
@@ -82,17 +80,11 @@ public class EventMapper {
     }
 
     public static Long getInitiatorId(Event event) {
-        if (event.getInitiatorId() != null) {
-            return event.getInitiatorId();
-        }
-        return event.getInitiator() == null ? null : event.getInitiator().getUserId();
+        return event.getInitiatorId();
     }
 
     public static Long getCategoryId(Event event) {
-        if (event.getCategoryId() != null) {
-            return event.getCategoryId();
-        }
-        return event.getCategory() == null ? null : event.getCategory().getId();
+        return event.getCategoryId();
     }
 
     private static UserShortDto toUserShortDto(UserInternalDto user, Long fallbackId) {

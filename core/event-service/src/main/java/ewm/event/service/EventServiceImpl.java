@@ -1,6 +1,5 @@
 package ewm.event.service;
 
-import ewm.category.model.Category;
 import ewm.category.service.CategoryReferenceService;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
@@ -14,7 +13,6 @@ import ewm.event.model.EventStateActionAdmin;
 import ewm.event.repository.DatabaseEventSearchRepository;
 import ewm.event.repository.EventRepository;
 import ewm.request.client.RequestClient;
-import ewm.user.model.User;
 import ewm.user.service.UserReferenceService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -50,11 +48,10 @@ public class EventServiceImpl implements EventService {
     public EventFullDto create(Long userId, NewEventDto eventDto) {
         isEventTimeValid(eventDto.getEventDate());
 
-        User user = userReferenceService.getExistingReference(userId);
+        userReferenceService.ensureExists(userId);
+        categoryReferenceService.ensureExists(eventDto.getCategory());
 
-        Category category = categoryReferenceService.getExistingReference(eventDto.getCategory());
-
-        Event event = EventMapper.mapToEvent(user, eventDto, category);
+        Event event = EventMapper.mapToEvent(userId, eventDto, eventDto.getCategory());
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
         event = eventRepository.save(event);
@@ -117,7 +114,7 @@ public class EventServiceImpl implements EventService {
 
         Pageable page = PageRequest.of(from / size, size);
 
-        List<Event> eventList = eventRepository.findByInitiatorUserId(userId, page);
+        List<Event> eventList = eventRepository.findByInitiatorId(userId, page);
 
         return this.mapToEventShortDto(eventList);
     }
@@ -182,8 +179,8 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventUserRequest.hasCategory() &&
                 !EventMapper.getCategoryId(updatedEvent).equals(updateEventUserRequest.getCategory())) {
-            Category category = categoryReferenceService.getExistingReference(updateEventUserRequest.getCategory());
-            updatedEvent.setCategory(category);
+            categoryReferenceService.ensureExists(updateEventUserRequest.getCategory());
+            updatedEvent.setCategoryId(updateEventUserRequest.getCategory());
         }
 
         isEventTimeValid(updatedEvent.getEventDate());
@@ -224,8 +221,8 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventAdminRequest.hasCategory() &&
                 !EventMapper.getCategoryId(updatedEvent).equals(updateEventAdminRequest.getCategory())) {
-            Category category = categoryReferenceService.getExistingReference(updateEventAdminRequest.getCategory());
-            updatedEvent.setCategory(category);
+            categoryReferenceService.ensureExists(updateEventAdminRequest.getCategory());
+            updatedEvent.setCategoryId(updateEventAdminRequest.getCategory());
         }
 
         updatedEvent = eventRepository.save(updatedEvent);

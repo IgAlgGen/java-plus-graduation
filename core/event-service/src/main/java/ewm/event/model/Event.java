@@ -1,8 +1,6 @@
 package ewm.event.model;
 
-import ewm.category.model.Category;
 import ewm.common.model.Location;
-import ewm.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,20 +21,10 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* === Relations === */
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "initiator_id")
-    private User initiator;
-
-    @Column(name = "initiator_id", insertable = false, updatable = false)
+    @Column(name = "initiator_id", nullable = false)
     private Long initiatorId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @Column(name = "category_id", insertable = false, updatable = false)
+    @Column(name = "category_id", nullable = false)
     private Long categoryId;
 
     /* === Basic fields === */

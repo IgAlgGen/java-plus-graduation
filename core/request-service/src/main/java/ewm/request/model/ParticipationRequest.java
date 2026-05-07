@@ -1,7 +1,5 @@
 package ewm.request.model;
 
-import ewm.event.model.Event;
-import ewm.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,16 +30,8 @@ public class ParticipationRequest {
     @Column(name = "requester_id", nullable = false)
     private Long requesterId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id", insertable = false, updatable = false)
-    private User requester;
-
     @Column(name = "event_id", nullable = false)
     private Long eventId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", insertable = false, updatable = false)
-    private Event event;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

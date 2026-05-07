@@ -36,16 +36,10 @@ public final class CommentMapper {
     }
 
     public static Long getEventId(Comment comment) {
-        if (comment.getEventId() != null) {
-            return comment.getEventId();
-        }
-        return comment.getEvent().getId();
+        return comment.getEventId();
     }
 
     public static Long getAuthorId(Comment comment) {
-        if (comment.getAuthorId() != null) {
-            return comment.getAuthorId();
-        }
-        return comment.getAuthor().getUserId();
+        return comment.getAuthorId();
     }
 }
