@@ -230,6 +230,7 @@ services:
     build:
       context: .
       dockerfile: infra/gateway-server/Dockerfile
+    entrypoint: ["sh", "-c", "sleep $${GATEWAY_STARTUP_DELAY:-20} && exec java -jar app.jar"]
     depends_on:
       discovery-server:
         condition: service_healthy
@@ -246,6 +247,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      GATEWAY_STARTUP_DELAY: 20
       SERVER_PORT: 8080
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
