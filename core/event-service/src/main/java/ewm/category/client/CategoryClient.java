@@ -9,7 +9,7 @@ import ru.practicum.ewm.internal.dto.IdsRequest;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "${feature.service.id:feature-service}")
+@FeignClient(name = "${category.service.id:category-service}")
 public interface CategoryClient {
 
     @GetMapping(ApiPaths.CATEGORIES_BY_ID)
