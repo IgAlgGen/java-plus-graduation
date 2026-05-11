@@ -109,16 +109,42 @@ services:
       interval: 5s
       retries: 5
 
-  feature-db:
+  category-db:
     image: postgres:16.1
     environment:
-      POSTGRES_DB: ewm-feature
-      POSTGRES_USER: feature
-      POSTGRES_PASSWORD: feature
+      POSTGRES_DB: ewm-category
+      POSTGRES_USER: category
+      POSTGRES_PASSWORD: category
     volumes:
-      - ./core/feature-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./core/category-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U feature -d ewm-feature"]
+      test: ["CMD-SHELL", "pg_isready -U category -d ewm-category"]
+      interval: 5s
+      retries: 5
+
+  compilation-db:
+    image: postgres:16.1
+    environment:
+      POSTGRES_DB: ewm-compilation
+      POSTGRES_USER: compilation
+      POSTGRES_PASSWORD: compilation
+    volumes:
+      - ./core/compilation-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U compilation -d ewm-compilation"]
+      interval: 5s
+      retries: 5
+
+  comment-db:
+    image: postgres:16.1
+    environment:
+      POSTGRES_DB: ewm-comment
+      POSTGRES_USER: comment
+      POSTGRES_PASSWORD: comment
+    volumes:
+      - ./core/comment-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comment -d ewm-comment"]
       interval: 5s
       retries: 5
 
@@ -135,7 +161,7 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
-      feature-service:
+      category-service:
         condition: service_healthy
       stats-server:
         condition: service_healthy
@@ -150,30 +176,78 @@ services:
       STATS_SERVICE_ID: stats-server
       USER_SERVICE_ID: user-service
       REQUEST_SERVICE_ID: request-service
-      FEATURE_SERVICE_ID: feature-service
+      CATEGORY_SERVICE_ID: category-service
     healthcheck: *actuator-healthcheck
 
-  feature-service:
+  category-service:
     build:
       context: .
-      dockerfile: core/feature-service/Dockerfile
+      dockerfile: core/category-service/Dockerfile
     depends_on:
       discovery-server:
         condition: service_healthy
       config-server:
         condition: service_healthy
-      feature-db:
-        condition: service_healthy
-      user-service:
+      category-db:
         condition: service_healthy
     environment:
       SERVER_PORT: 8094
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      SPRING_DATASOURCE_URL: jdbc:postgresql://feature-db:5432/ewm-feature
-      SPRING_DATASOURCE_USERNAME: feature
-      SPRING_DATASOURCE_PASSWORD: feature
+      SPRING_DATASOURCE_URL: jdbc:postgresql://category-db:5432/ewm-category
+      SPRING_DATASOURCE_USERNAME: category
+      SPRING_DATASOURCE_PASSWORD: category
+      EVENT_SERVICE_ID: event-service
+    healthcheck: *actuator-healthcheck
+
+  compilation-service:
+    build:
+      context: .
+      dockerfile: core/compilation-service/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      compilation-db:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8095
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://compilation-db:5432/ewm-compilation
+      SPRING_DATASOURCE_USERNAME: compilation
+      SPRING_DATASOURCE_PASSWORD: compilation
+      EVENT_SERVICE_ID: event-service
+    healthcheck: *actuator-healthcheck
+
+  comment-service:
+    build:
+      context: .
+      dockerfile: core/comment-service/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      comment-db:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8096
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://comment-db:5432/ewm-comment
+      SPRING_DATASOURCE_USERNAME: comment
+      SPRING_DATASOURCE_PASSWORD: comment
       USER_SERVICE_ID: user-service
       EVENT_SERVICE_ID: event-service
     healthcheck: *actuator-healthcheck
@@ -240,7 +314,11 @@ services:
         condition: service_healthy
       request-service:
         condition: service_healthy
-      feature-service:
+      category-service:
+        condition: service_healthy
+      compilation-service:
+        condition: service_healthy
+      comment-service:
         condition: service_healthy
       user-service:
         condition: service_healthy
