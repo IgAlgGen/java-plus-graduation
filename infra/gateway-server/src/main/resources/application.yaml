@@ -14,26 +14,34 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: feature-service-admin-user-comments-api
-          uri: lb://feature-service
+        - id: comment-service-admin-user-comments-api
+          uri: lb://comment-service
           predicates:
             - Path=/admin/users/*/events/*/comments,/admin/users/*/comments/*
         - id: user-service-api
           uri: lb://user-service
           predicates:
             - Path=/admin/users/**
-        - id: feature-service-event-comments-api
-          uri: lb://feature-service
+        - id: comment-service-event-comments-api
+          uri: lb://comment-service
           predicates:
             - Path=/events/*/comments
         - id: request-service-api
           uri: lb://request-service
           predicates:
             - Path=/users/*/requests,/users/*/requests/**,/users/*/events/*/requests
-        - id: feature-service-category-api
-          uri: lb://feature-service
+        - id: category-service-api
+          uri: lb://category-service
           predicates:
-            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**,/comments,/comments/**,/admin/comments,/admin/comments/**
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**
+        - id: compilation-service-api
+          uri: lb://compilation-service
+          predicates:
+            - Path=/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
+        - id: comment-service-api
+          uri: lb://comment-service
+          predicates:
+            - Path=/comments,/comments/**,/admin/comments,/admin/comments/**
         - id: event-service-api
           uri: lb://event-service
           predicates:
