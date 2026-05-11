@@ -3,7 +3,7 @@ package ru.practicum.ewm.internal.dto;
 import java.time.LocalDateTime;
 
 /**
- * Краткое внутреннее представление события для сборки внешних DTO в feature-service.
+ * Краткое внутреннее представление события для сборки внешних DTO во внешних сервисах.
  *
  * @param id идентификатор события
  * @param title заголовок события

@@ -147,7 +147,13 @@ docker compose up --build
 5. `event-service`, `request-service`
 6. `gateway-server`
 
-Часть сервисов зависит от `service_started`, а не от полной готовности приложения. Если Gateway сразу после старта возвращает 503, подождите регистрацию сервисов в Eureka и повторите запрос.
+App-сервисы ожидают зависимости через `condition: service_healthy`. Для `gateway-server` дополнительно задана задержка старта `GATEWAY_STARTUP_DELAY=20`, чтобы дать Eureka время обновить registry перед первыми внешними запросами.
+
+Для запуска Postman/Newman тестов сразу после Docker Compose используйте режим ожидания healthcheck:
+
+```bash
+docker compose up -d --build --wait
+```
 
 ### 4. Проверить работоспособность
 
@@ -183,6 +189,12 @@ docker compose up --build
 
 ```bash
 docker compose up -d --build
+```
+
+Запуск в фоне с ожиданием готовности сервисов:
+
+```bash
+docker compose up -d --build --wait
 ```
 
 Остановка контейнеров:
