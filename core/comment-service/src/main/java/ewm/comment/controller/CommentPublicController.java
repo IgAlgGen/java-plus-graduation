@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Публичный REST-контроллер чтения одобренных комментариев.
- */
+
 @Validated
 @RestController
 @RequiredArgsConstructor

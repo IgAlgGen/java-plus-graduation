@@ -8,6 +8,5 @@ import lombok.Data;
 @Data
 public class UserShortDto {
     private Long id;
-    /** Имя пользователя. */
     private String name;
 }

@@ -13,7 +13,6 @@ public class UpdateCommentRequest {
         this.text = value;
     }
 
-    /** Новый текст комментария; обязательное непустое значение от 1 до 5000 символов. */
     @NotBlank
     @Size(min = 1, max = 5000)
     private String text;

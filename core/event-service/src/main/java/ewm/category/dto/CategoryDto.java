@@ -12,7 +12,6 @@ public class CategoryDto {
     @NotNull
     private Long id;
 
-    /** Название категории; обязательное непустое значение. */
     @NotBlank
     private String name;
 }

@@ -14,7 +14,6 @@ public class NewCommentDto {
         this.text = value;
     }
 
-    /** Текст комментария; обязательное непустое значение от 1 до 5000 символов. */
     @NotNull
     @NotBlank
     @Size(min = 1, max = 5000)

@@ -8,9 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Административный REST-контроллер модерации комментариев.
- */
+
 @Validated
 @RestController
 @RequiredArgsConstructor

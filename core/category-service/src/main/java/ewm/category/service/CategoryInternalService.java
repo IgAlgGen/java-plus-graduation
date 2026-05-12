@@ -5,9 +5,6 @@ import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Внутренний сервис чтения категорий для других микросервисов.
- */
 public interface CategoryInternalService {
     /**
      * Возвращает категорию по идентификатору.

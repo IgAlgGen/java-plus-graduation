@@ -8,11 +8,9 @@ import lombok.Data;
  */
 @Data
 public class LocationDto {
-    /** Широта; обязательное значение. */
     @NotNull
     private Float lat;
 
-    /** Долгота; обязательное значение. */
     @NotNull
     private Float lon;
 }

@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST-контроллер личного кабинета инициатора событий.
- */
 @Validated
 @RestController
 @RequiredArgsConstructor

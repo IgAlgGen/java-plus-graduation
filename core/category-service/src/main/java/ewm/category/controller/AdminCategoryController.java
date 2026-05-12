@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Административный REST-контроллер категорий.
@@ -30,7 +31,7 @@ public class AdminCategoryController {
      * @return созданная категория
      */
     @PostMapping
-    @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto create(@Valid @RequestBody NewCategoryDto dto) {
         return categoryService.create(dto);
     }
@@ -53,7 +54,7 @@ public class AdminCategoryController {
      * @param catId идентификатор категории
      */
     @DeleteMapping("/{catId}")
-    @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long catId) {
         categoryService.delete(catId);
     }

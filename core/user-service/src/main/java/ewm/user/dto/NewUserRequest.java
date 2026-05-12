@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/**
- * Запрос администратора на создание пользователя.
- */
 @Data
 public class NewUserRequest {
     /** Email пользователя; обязателен, должен быть валидным, от 6 до 254 символов. */

@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Административный REST-контроллер пользователей.
- */
 @Validated
 @RestController
 @RequiredArgsConstructor

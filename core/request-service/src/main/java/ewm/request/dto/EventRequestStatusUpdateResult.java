@@ -14,8 +14,6 @@ import java.util.List;
 @Builder
 @Data
 public class EventRequestStatusUpdateResult {
-    /** Заявки, переведенные в статус подтверждения. */
     private List<ParticipationRequestDto> confirmedRequests;
-    /** Заявки, переведенные в статус отклонения. */
     private List<ParticipationRequestDto> rejectedRequests;
 }

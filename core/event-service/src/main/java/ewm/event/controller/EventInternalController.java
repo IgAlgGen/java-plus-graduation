@@ -11,9 +11,6 @@ import ru.practicum.ewm.internal.dto.IdsRequest;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST-контроллер внутреннего API событий для других сервисов.
- */
 @RestController
 @RequiredArgsConstructor
 public class EventInternalController {

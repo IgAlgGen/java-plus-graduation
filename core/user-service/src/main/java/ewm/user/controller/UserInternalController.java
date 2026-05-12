@@ -10,9 +10,6 @@ import ru.practicum.ewm.internal.dto.UserInternalDto;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST-контроллер внутреннего API пользователей.
- */
 @RestController
 @RequiredArgsConstructor
 public class UserInternalController {

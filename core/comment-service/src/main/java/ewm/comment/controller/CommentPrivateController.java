@@ -11,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST-контроллер пользовательских операций с комментариями.
- */
+
 @Validated
 @RestController
 @RequiredArgsConstructor

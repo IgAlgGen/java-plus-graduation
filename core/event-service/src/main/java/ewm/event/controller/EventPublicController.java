@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Публичный REST-контроллер опубликованных событий.
- */
 @RestController
 @Validated
 @RequiredArgsConstructor
