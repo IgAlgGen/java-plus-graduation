@@ -25,7 +25,6 @@ import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
 import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
-import ru.practicum.ewm.stats.dto.EndpointHitDto;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -245,12 +244,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void registerHit(HttpServletRequest request) {
-        EndpointHitDto endpointHitDto = new EndpointHitDto();
-        endpointHitDto.setApp("main-service");
-        endpointHitDto.setUri(request.getRequestURI());
-        endpointHitDto.setIp(request.getRemoteAddr());
-        endpointHitDto.setTimestamp(LocalDateTime.now());
-        statsResilienceService.hit(endpointHitDto);
+        statsResilienceService.collectView(request.getRequestURI());
     }
 
     private List<EventFullDto> mapToEventFullDto(List<Event> eventList) {

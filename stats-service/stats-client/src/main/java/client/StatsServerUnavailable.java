@@ -1,7 +1,7 @@
 package client;
 
 /**
- * Исключение клиента статистики при недоступности stats-server или ошибке обмена с ним.
+ * Исключение клиента статистики при недоступности gRPC stats-сервисов или ошибке обмена с ними.
  */
 public class StatsServerUnavailable extends RuntimeException {
     public StatsServerUnavailable(String message) {
