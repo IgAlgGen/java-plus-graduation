@@ -273,7 +273,9 @@ services:
         condition: service_healthy
       category-service:
         condition: service_healthy
-      stats-server:
+      collector:
+        condition: service_healthy
+      analyzer:
         condition: service_healthy
     environment:
       SERVER_PORT: 8092
@@ -283,7 +285,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://events-db:5432/ewm-events
       SPRING_DATASOURCE_USERNAME: events
       SPRING_DATASOURCE_PASSWORD: ${EVENTS_DB_PASSWORD}
-      STATS_SERVICE_ID: stats-server
+      GRPC_CLIENT_COLLECTOR_ADDRESS: discovery:///collector
+      GRPC_CLIENT_ANALYZER_ADDRESS: discovery:///analyzer
       USER_SERVICE_ID: user-service
       REQUEST_SERVICE_ID: request-service
       CATEGORY_SERVICE_ID: category-service
@@ -377,6 +380,10 @@ services:
         condition: service_healthy
       event-service:
         condition: service_healthy
+      collector:
+        condition: service_healthy
+      analyzer:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8093
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
@@ -385,6 +392,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://requests-db:5432/ewm-requests
       SPRING_DATASOURCE_USERNAME: requests
       SPRING_DATASOURCE_PASSWORD: ${REQUESTS_DB_PASSWORD}
+      GRPC_CLIENT_COLLECTOR_ADDRESS: discovery:///collector
+      GRPC_CLIENT_ANALYZER_ADDRESS: discovery:///analyzer
       USER_SERVICE_ID: user-service
       EVENT_SERVICE_ID: event-service
     healthcheck: *actuator-healthcheck
