@@ -16,6 +16,6 @@ public class UserActionProducer {
 
     public void send(UserActionAvro userAction) {
         byte[] payload = avroSerializer.serialize(userAction);
-        kafkaTemplate.send(kafkaProperties.getUserActions(), userAction.getEventId(), payload).join();
+        kafkaTemplate.send(kafkaProperties.getUserActions(), 0, userAction.getEventId(), payload).join();
     }
 }

@@ -22,6 +22,6 @@ public class EventSimilarityProducer {
 
     public void send(EventSimilarityAvro eventSimilarity) {
         byte[] payload = avroCodec.serialize(eventSimilarity);
-        kafkaTemplate.send(kafkaProperties.getEventsSimilarity(), eventSimilarity.getEventA(), payload).join();
+        kafkaTemplate.send(kafkaProperties.getEventsSimilarity(), 0, eventSimilarity.getEventA(), payload).join();
     }
 }
