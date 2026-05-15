@@ -54,4 +54,10 @@ public class ParticipationRequestInternalController {
                                                           @RequestBody IdsRequest request) {
         return service.existsUserRequestsForEvents(userId, request.ids());
     }
+
+    @PostMapping(ApiPaths.REQUESTS_USER_CONFIRMED_EVENTS_EXISTS)
+    public Map<Long, Boolean> existsUserConfirmedRequestsForEvents(@PathVariable("userId") Long userId,
+                                                                   @RequestBody IdsRequest request) {
+        return service.existsUserConfirmedRequestsForEvents(userId, request.ids());
+    }
 }
