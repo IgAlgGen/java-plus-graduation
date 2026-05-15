@@ -117,6 +117,7 @@ public class AnalyzerServiceImpl implements AnalyzerService {
         }
 
         return candidates.keySet().stream()
+                .limit(maxResults)
                 .map(candidateId -> predictScore(candidateId, history))
                 .filter(recommendation -> recommendation.score() > 0.0)
                 .sorted(Comparator.comparingDouble(RecommendedEvent::score).reversed())

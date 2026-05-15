@@ -77,6 +77,23 @@ class AnalyzerServiceImplTest {
     }
 
     @Test
+    void getRecommendationsForUserShouldLimitCandidatesBySimilarityBeforePrediction() {
+        interaction(1, 10, 1.0, BASE_TIME.plusSeconds(10));
+        interaction(1, 20, 0.1, BASE_TIME.plusSeconds(20));
+
+        similarity(10, 30, 0.90);
+        similarity(20, 30, 0.10);
+        similarity(10, 40, 0.50);
+        similarity(20, 40, 1.00);
+
+        List<RecommendedEvent> recommendations = analyzerService.getRecommendationsForUser(1, 1);
+
+        assertThat(recommendations)
+                .extracting(RecommendedEvent::eventId)
+                .containsExactly(30L);
+    }
+
+    @Test
     void getRecommendationsForUserShouldReturnEmptyWhenUserHasNoHistory() {
         similarity(10, 20, 0.9);
 
