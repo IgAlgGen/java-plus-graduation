@@ -132,7 +132,7 @@ services:
         condition: service_completed_successfully
     environment:
       SERVER_PORT: 9091
-      GRPC_SERVER_PORT: 0
+      GRPC_SERVER_PORT: 9090
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED: "false"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
