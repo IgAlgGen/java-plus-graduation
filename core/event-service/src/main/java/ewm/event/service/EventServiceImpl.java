@@ -198,7 +198,7 @@ public class EventServiceImpl implements EventService {
         boolean visited = requestClient.existsUserConfirmedRequestsForEvents(userId, new IdsRequest(List.of(eventId)))
                 .getOrDefault(eventId, false);
         if (!visited) {
-            throw new ConflictException("Пользователь не посещал мероприятие");
+            throw new BadRequestException("Пользователь не посещал мероприятие");
         }
 
         collectorClient.collectUserAction(userId, eventId, ActionType.LIKE);
