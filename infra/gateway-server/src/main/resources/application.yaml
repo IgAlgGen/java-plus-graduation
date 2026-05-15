@@ -14,10 +14,42 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: main-service-api
-          uri: lb://main-service
+        - id: comment-service-admin-user-comments-api
+          uri: lb://comment-service
           predicates:
-            - Path=/admin/**,/users/**,/events/**,/categories/**,/compilations/**,/comments/**
+            - Path=/admin/users/*/events/*/comments,/admin/users/*/comments/*
+        - id: user-service-api
+          uri: lb://user-service
+          predicates:
+            - Path=/admin/users/**
+        - id: comment-service-event-comments-api
+          uri: lb://comment-service
+          predicates:
+            - Path=/events/*/comments
+        - id: request-service-api
+          uri: lb://request-service
+          predicates:
+            - Path=/users/*/requests,/users/*/requests/**,/users/*/events/*/requests
+        - id: category-service-api
+          uri: lb://category-service
+          predicates:
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**
+        - id: compilation-service-api
+          uri: lb://compilation-service
+          predicates:
+            - Path=/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
+        - id: comment-service-api
+          uri: lb://comment-service
+          predicates:
+            - Path=/comments,/comments/**,/admin/comments,/admin/comments/**
+        - id: event-service-api
+          uri: lb://event-service
+          predicates:
+            - Path=/events,/events/**,/admin/events,/admin/events/**,/users/*/events,/users/*/events/**
+        - id: stats-server-api
+          uri: lb://stats-server
+          predicates:
+            - Path=/hit,/stats
 
 server:
   port: 8080

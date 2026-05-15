@@ -65,6 +65,7 @@
 					<configuration>
 						<systemPropertyVariables>
 							<spring.profiles.active>test</spring.profiles.active>
+							<spring.config.import>optional:file:${maven.multiModuleProjectDirectory}/.env.test[.properties]</spring.config.import>
 						</systemPropertyVariables>
 					</configuration>
 				</plugin>

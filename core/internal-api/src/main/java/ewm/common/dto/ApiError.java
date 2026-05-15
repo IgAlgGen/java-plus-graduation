@@ -1,0 +1,22 @@
+package ewm.common.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Стандартное тело ответа об ошибке REST API.
+ */
+@Data
+@Builder
+public class ApiError {
+    private List<String> errors;
+    private String message;
+    private String reason;
+    private String status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp;
+}
