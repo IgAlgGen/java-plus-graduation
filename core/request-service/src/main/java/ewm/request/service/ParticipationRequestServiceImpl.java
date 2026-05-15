@@ -1,5 +1,7 @@
 package ewm.request.service;
 
+import client.ActionType;
+import client.CollectorClient;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
 import ewm.event.service.EventReferenceService;
@@ -35,6 +37,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private final ParticipationRequestRepository requestRepo;
     private final UserReferenceService userReferenceService;
     private final EventReferenceService eventReferenceService;
+    private final CollectorClient collectorClient;
 
     @Override
     @Transactional
@@ -80,6 +83,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         ParticipationRequest saved = requestRepo.save(req);
+        collectorClient.collectUserAction(userId, eventId, ActionType.REGISTER);
         return ParticipationRequestMapper.toDto(saved);
     }
 
