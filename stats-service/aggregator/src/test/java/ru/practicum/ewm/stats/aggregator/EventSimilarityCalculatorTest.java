@@ -57,20 +57,15 @@ class EventSimilarityCalculatorTest {
     }
 
     @Test
-    void shouldRecalculatePairsWithChangedDenominatorEvenWithoutChangedMinSum() {
+    void shouldNotPublishPairsWithoutCurrentUserInteraction() {
         calculator.update(1L, 10L, 0.8, NOW);
         calculator.update(1L, 20L, 0.8, NOW);
 
         List<EventSimilarity> updates = calculator.update(2L, 10L, 0.4, NOW);
 
-        assertEquals(1, updates.size());
-        EventSimilarity pair10And20 = updates.stream()
-                .filter(update -> update.eventA() == 10L && update.eventB() == 20L)
-                .findFirst()
-                .orElseThrow();
-
+        assertTrue(updates.isEmpty());
         assertEquals(0.8, calculator.getMinWeightSum(10L, 20L), EPSILON);
-        assertEquals(0.8 / (Math.sqrt(1.2) * Math.sqrt(0.8)), pair10And20.score(), EPSILON);
+        assertEquals(0.8 / (Math.sqrt(1.2) * Math.sqrt(0.8)), calculator.getSimilarity(10L, 20L), EPSILON);
     }
 
     @Test

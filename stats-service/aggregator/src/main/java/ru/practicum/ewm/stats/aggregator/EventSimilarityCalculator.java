@@ -37,11 +37,13 @@ public class EventSimilarityCalculator {
 
             EventPair pair = new EventPair(eventId, otherEventId);
             Double otherWeight = eventUserWeights.get(otherEventId).get(userId);
-            if (otherWeight != null) {
-                double deltaMin = Math.min(weight, otherWeight) - Math.min(oldWeight, otherWeight);
-                if (deltaMin > 0.0) {
-                    minWeightSums.merge(pair, deltaMin, Double::sum);
-                }
+            if (otherWeight == null) {
+                continue;
+            }
+
+            double deltaMin = Math.min(weight, otherWeight) - Math.min(oldWeight, otherWeight);
+            if (deltaMin > 0.0) {
+                minWeightSums.merge(pair, deltaMin, Double::sum);
             }
 
             double minWeightSum = minWeightSums.getOrDefault(pair, 0.0);
