@@ -4,6 +4,7 @@ import client.ActionType;
 import client.AnalyzerClient;
 import client.CollectorClient;
 import client.RecommendedEvent;
+import client.StatsServerUnavailable;
 import ewm.category.service.CategoryReferenceService;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
@@ -19,6 +20,7 @@ import ewm.event.repository.EventRepository;
 import ewm.request.client.RequestClient;
 import ewm.user.service.UserReferenceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final UserReferenceService userReferenceService;
     private final EventRepository eventRepository;
@@ -343,8 +346,12 @@ public class EventServiceImpl implements EventService {
                 .toList();
 
         Map<Long, Double> ratings = new HashMap<>();
-        for (RecommendedEvent rating : analyzerClient.getInteractionsCount(ids)) {
-            ratings.put(rating.eventId(), rating.score());
+        try {
+            for (RecommendedEvent rating : analyzerClient.getInteractionsCount(ids)) {
+                ratings.put(rating.eventId(), rating.score());
+            }
+        } catch (StatsServerUnavailable exception) {
+            log.warn("Analyzer is unavailable while loading event ratings for ids={}", ids, exception);
         }
         return ratings;
     }
