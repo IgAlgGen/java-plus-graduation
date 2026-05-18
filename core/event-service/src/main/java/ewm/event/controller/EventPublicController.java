@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.ewm.internal.ApiDateTimePatterns.DATE_TIME_PATTERN;
+import static ru.practicum.ewm.internal.ApiHeaders.USER_ID_HEADER;
+
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -25,13 +28,13 @@ public class EventPublicController {
      * Возвращает опубликованное событие и учитывает просмотр пользователя.
      *
      * @param eventId идентификатор события
-     * @param request HTTP-запрос для регистрации статистики
+     * @param userId идентификатор пользователя
      * @return полная информация о событии
      */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getPublicEvent(@PathVariable("id") Long eventId,
-                                       @RequestHeader("X-EWM-USER-ID") long userId) {
+                                       @RequestHeader(USER_ID_HEADER) long userId) {
         return eventService.getPublicEvent(eventId, userId);
     }
 
@@ -55,9 +58,9 @@ public class EventPublicController {
                                                @RequestParam(required = false) List<Long> categories,
                                                @RequestParam(required = false) Boolean paid,
                                                @RequestParam(required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                               @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeStart,
                                                @RequestParam(required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                               @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                @RequestParam(required = false) EventSort sort,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
@@ -68,7 +71,7 @@ public class EventPublicController {
 
     @GetMapping("/recommendations")
     @ResponseStatus(HttpStatus.OK)
-    public List<EventShortDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") long userId,
+    public List<EventShortDto> getRecommendations(@RequestHeader(USER_ID_HEADER) long userId,
                                                   @RequestParam(defaultValue = "10") @PositiveOrZero int maxResults) {
         return eventService.getRecommendations(userId, maxResults);
     }
@@ -76,7 +79,7 @@ public class EventPublicController {
     @PutMapping("/{eventId}/like")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto like(@PathVariable Long eventId,
-                             @RequestHeader("X-EWM-USER-ID") long userId) {
+                             @RequestHeader(USER_ID_HEADER) long userId) {
         return eventService.like(eventId, userId);
     }
 }

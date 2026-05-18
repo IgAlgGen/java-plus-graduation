@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.ewm.internal.ApiDateTimePatterns.DATE_TIME_PATTERN;
+
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -40,9 +42,9 @@ public class EventAdminController {
     public List<EventFullDto> get(@RequestParam(required = false) List<Long> users,
                                   @RequestParam(required = false) List<EventState> states,
                                   @RequestParam(required = false) List<Long> categories,
-                                  @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN)
                                   LocalDateTime rangeStart,
-                                  @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN)
                                   LocalDateTime rangeEnd,
                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                   @RequestParam(defaultValue = "10") @Positive int size) {
