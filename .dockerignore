@@ -1,0 +1,9 @@
+.git
+.idea
+*.iml
+
+**/target
+**/.mvn
+
+*.log
+COLLECTIONreport.txt

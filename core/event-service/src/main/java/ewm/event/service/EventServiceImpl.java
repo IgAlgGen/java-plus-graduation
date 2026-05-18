@@ -1,5 +1,10 @@
 package ewm.event.service;
 
+import client.ActionType;
+import client.AnalyzerClient;
+import client.CollectorClient;
+import client.RecommendedEvent;
+import client.StatsServerUnavailable;
 import ewm.category.service.CategoryReferenceService;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
@@ -14,8 +19,8 @@ import ewm.event.repository.DatabaseEventSearchRepository;
 import ewm.event.repository.EventRepository;
 import ewm.request.client.RequestClient;
 import ewm.user.service.UserReferenceService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,13 +30,15 @@ import ru.practicum.ewm.internal.dto.EventConfirmedRequestsInternalDto;
 import ru.practicum.ewm.internal.dto.IdsRequest;
 import ru.practicum.ewm.internal.dto.CategoryInternalDto;
 import ru.practicum.ewm.internal.dto.UserInternalDto;
-import ru.practicum.ewm.stats.dto.EndpointHitDto;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Реализация бизнес-правил работы с событиями.
@@ -41,13 +48,15 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final UserReferenceService userReferenceService;
     private final EventRepository eventRepository;
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
     private final CategoryReferenceService categoryReferenceService;
-    private final StatsResilienceService statsResilienceService;
     private final RequestClient requestClient;
+    private final CollectorClient collectorClient;
+    private final AnalyzerClient analyzerClient;
 
     @Override
     @Transactional
@@ -99,7 +108,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public EventFullDto getPublicEvent(Long eventId, HttpServletRequest request) {
+    public EventFullDto getPublicEvent(Long eventId, long userId) {
+        userReferenceService.ensureExists(userId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
 
@@ -107,10 +117,9 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие не опубликовано");
         }
 
-        List<Event> eventList = List.of(event);
-        registerHit(request);
+        collectorClient.collectUserAction(userId, eventId, ActionType.VIEW);
 
-        return this.mapToEventFullDto(eventList).getFirst();
+        return this.mapToEventFullDto(List.of(event)).getFirst();
     }
 
     @Override
@@ -135,15 +144,14 @@ public class EventServiceImpl implements EventService {
                                                Boolean onlyAvailable,
                                                EventSort sort,
                                                int from,
-                                               int size,
-                                               HttpServletRequest request) {
+                                               int size) {
 
         if (rangeStart == null) rangeStart = LocalDateTime.now();
         if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
             throw new BadRequestException("Дата начала диапазона должна быть раньше даты окончания");
         }
 
-        // Pageable: сортировка только по eventDate, не по views
+        // Pageable: сортировка только по eventDate, не по rating
         Pageable page;
         if (sort == EventSort.EVENT_DATE) {
             page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "eventDate"));
@@ -151,19 +159,53 @@ public class EventServiceImpl implements EventService {
             page = PageRequest.of(from / size, size);
         }
 
-        registerHit(request);
-
         List<Event> eventList = databaseEventSearchRepository.findPublicEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page
         );
 
         List<EventShortDto> dtos = mapToEventShortDto(eventList);
 
-        if (sort == EventSort.VIEWS) {
-            dtos.sort(Comparator.comparingLong(EventShortDto::getViews).reversed());
+        if (sort == EventSort.RATING || sort == EventSort.VIEWS) {
+            dtos.sort(Comparator.comparingDouble(EventShortDto::getRating).reversed());
         }
 
         return dtos;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventShortDto> getRecommendations(long userId, int maxResults) {
+        userReferenceService.ensureExists(userId);
+        if (maxResults <= 0) {
+            return List.of();
+        }
+
+        List<Long> eventIds = analyzerClient.getRecommendationsForUser(userId, maxResults).stream()
+                .map(RecommendedEvent::eventId)
+                .toList();
+
+        return mapToEventShortDto(getPublishedEventsInOrder(eventIds));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EventFullDto like(Long eventId, long userId) {
+        userReferenceService.ensureExists(userId);
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new NotFoundException("Событие не опубликовано");
+        }
+
+        boolean visited = requestClient.existsUserConfirmedRequestsForEvents(userId, new IdsRequest(List.of(eventId)))
+                .getOrDefault(eventId, false);
+        if (!visited) {
+            throw new BadRequestException("Пользователь не посещал мероприятие");
+        }
+
+        collectorClient.collectUserAction(userId, eventId, ActionType.LIKE);
+        return this.mapToEventFullDto(List.of(event)).getFirst();
     }
 
 
@@ -244,17 +286,8 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void registerHit(HttpServletRequest request) {
-        EndpointHitDto endpointHitDto = new EndpointHitDto();
-        endpointHitDto.setApp("main-service");
-        endpointHitDto.setUri(request.getRequestURI());
-        endpointHitDto.setIp(request.getRemoteAddr());
-        endpointHitDto.setTimestamp(LocalDateTime.now());
-        statsResilienceService.hit(endpointHitDto);
-    }
-
     private List<EventFullDto> mapToEventFullDto(List<Event> eventList) {
-        Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
+        Map<Long, Double> ratings = getRatings(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
         Map<Long, CategoryInternalDto> categories = getCategories(eventList);
@@ -262,7 +295,7 @@ public class EventServiceImpl implements EventService {
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventFullDto(
                         e,
-                        views.getOrDefault(e.getId(), 0),
+                        ratings.getOrDefault(e.getId(), 0.0),
                         confirmed.getOrDefault(e.getId(), 0L),
                         initiators.get(EventMapper.getInitiatorId(e)),
                         categories.get(EventMapper.getCategoryId(e))
@@ -287,7 +320,7 @@ public class EventServiceImpl implements EventService {
 
 
     private List<EventShortDto> mapToEventShortDto(List<Event> eventList) {
-        Map<Long, Integer> views = statsResilienceService.getEventsViews(eventList);
+        Map<Long, Double> ratings = getRatings(eventList);
         Map<Long, Long> confirmed = getConfirmedRequests(eventList);
         Map<Long, UserInternalDto> initiators = getInitiators(eventList);
         Map<Long, CategoryInternalDto> categories = getCategories(eventList);
@@ -295,11 +328,52 @@ public class EventServiceImpl implements EventService {
         return eventList.stream()
                 .map(e -> EventMapper.mapToEventShortDto(
                         e,
-                        views.getOrDefault(e.getId(), 0),
+                        ratings.getOrDefault(e.getId(), 0.0),
                         confirmed.getOrDefault(e.getId(), 0L),
                         initiators.get(EventMapper.getInitiatorId(e)),
                         categories.get(EventMapper.getCategoryId(e))
                 ))
+                .toList();
+    }
+
+    private Map<Long, Double> getRatings(List<Event> eventList) {
+        if (eventList == null || eventList.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> ids = eventList.stream()
+                .map(Event::getId)
+                .toList();
+
+        Map<Long, Double> ratings = new HashMap<>();
+        try {
+            for (RecommendedEvent rating : analyzerClient.getInteractionsCount(ids)) {
+                ratings.put(rating.eventId(), rating.score());
+            }
+        } catch (StatsServerUnavailable exception) {
+            log.warn("Analyzer is unavailable while loading event ratings for ids={}", ids, exception);
+        }
+        return ratings;
+    }
+
+    private List<Event> getPublishedEventsInOrder(List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> requestedIds = eventIds.stream().collect(Collectors.toSet());
+        Map<Long, Event> events = eventRepository.findAllById(requestedIds).stream()
+                .filter(event -> event.getState() == EventState.PUBLISHED)
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        event -> event,
+                        (left, right) -> left,
+                        LinkedHashMap::new
+                ));
+
+        return eventIds.stream()
+                .map(events::get)
+                .filter(java.util.Objects::nonNull)
                 .toList();
     }
 

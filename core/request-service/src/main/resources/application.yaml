@@ -13,3 +13,13 @@ eureka:
   client:
     service-url:
       defaultZone: "${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}"
+
+server:
+  port: 0
+
+grpc:
+  client:
+    collector:
+      address: "${GRPC_CLIENT_COLLECTOR_ADDRESS:discovery:///collector}"
+    analyzer:
+      address: "${GRPC_CLIENT_ANALYZER_ADDRESS:discovery:///analyzer}"

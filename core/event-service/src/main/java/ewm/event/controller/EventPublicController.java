@@ -4,7 +4,6 @@ import ewm.event.dto.EventFullDto;
 import ewm.event.dto.EventShortDto;
 import ewm.event.model.EventSort;
 import ewm.event.service.EventService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.ewm.internal.ApiDateTimePatterns.DATE_TIME_PATTERN;
+import static ru.practicum.ewm.internal.ApiHeaders.USER_ID_HEADER;
+
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -23,20 +25,21 @@ public class EventPublicController {
     private final EventService eventService;
 
     /**
-     * Возвращает опубликованное событие и учитывает просмотр.
+     * Возвращает опубликованное событие и учитывает просмотр пользователя.
      *
      * @param eventId идентификатор события
-     * @param request HTTP-запрос для регистрации статистики
+     * @param userId идентификатор пользователя
      * @return полная информация о событии
      */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getPublicEvent(@PathVariable("id") Long eventId, HttpServletRequest request) {
-        return eventService.getPublicEvent(eventId, request);
+    public EventFullDto getPublicEvent(@PathVariable("id") Long eventId,
+                                       @RequestHeader(USER_ID_HEADER) long userId) {
+        return eventService.getPublicEvent(eventId, userId);
     }
 
     /**
-     * Ищет опубликованные события по публичным фильтрам и учитывает просмотр списка.
+     * Ищет опубликованные события по публичным фильтрам.
      *
      * @param text текст поиска по аннотации и описанию
      * @param categories идентификаторы категорий
@@ -47,7 +50,6 @@ public class EventPublicController {
      * @param sort сортировка результата
      * @param from смещение первого результата
      * @param size размер страницы
-     * @param request HTTP-запрос для регистрации статистики
      * @return краткая информация о найденных событиях
      */
     @GetMapping
@@ -56,15 +58,28 @@ public class EventPublicController {
                                                @RequestParam(required = false) List<Long> categories,
                                                @RequestParam(required = false) Boolean paid,
                                                @RequestParam(required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                               @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeStart,
                                                @RequestParam(required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                               @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                @RequestParam(required = false) EventSort sort,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                               @RequestParam(defaultValue = "10") @PositiveOrZero int size,
-                                               HttpServletRequest request) {
+                                               @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
         return eventService.getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
-                size, request);
+                size);
+    }
+
+    @GetMapping("/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EventShortDto> getRecommendations(@RequestHeader(USER_ID_HEADER) long userId,
+                                                  @RequestParam(defaultValue = "10") @PositiveOrZero int maxResults) {
+        return eventService.getRecommendations(userId, maxResults);
+    }
+
+    @PutMapping("/{eventId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public EventFullDto like(@PathVariable Long eventId,
+                             @RequestHeader(USER_ID_HEADER) long userId) {
+        return eventService.like(eventId, userId);
     }
 }

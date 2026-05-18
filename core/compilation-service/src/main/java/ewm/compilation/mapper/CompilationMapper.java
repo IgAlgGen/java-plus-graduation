@@ -50,7 +50,7 @@ public class CompilationMapper {
         dto.setInitiator(initiator);
         dto.setEventDate(event.eventDate());
         dto.setPaid(event.paid());
-        dto.setViews(0L);
+        dto.setRating(0.0);
         dto.setConfirmedRequests(0L);
         return dto;
     }

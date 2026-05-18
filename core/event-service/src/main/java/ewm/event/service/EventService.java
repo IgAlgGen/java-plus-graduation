@@ -3,7 +3,6 @@ package ewm.event.service;
 import ewm.event.dto.*;
 import ewm.event.model.EventSort;
 import ewm.event.model.EventState;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,14 +53,14 @@ public interface EventService {
                            int size);
 
     /**
-     * Возвращает опубликованное событие и регистрирует просмотр в сервисе статистики.
+     * Возвращает опубликованное событие и регистрирует просмотр пользователя.
      *
      * @param eventId идентификатор события
-     * @param request HTTP-запрос, из которого берутся URI и IP клиента
+     * @param userId идентификатор пользователя
      * @return опубликованное событие
      * @throws ewm.common.exception.NotFoundException если событие не найдено или не опубликовано
      */
-    EventFullDto getPublicEvent(Long eventId, HttpServletRequest request);
+    EventFullDto getPublicEvent(Long eventId, long userId);
 
     /**
      * Возвращает события, созданные пользователем.
@@ -74,7 +73,7 @@ public interface EventService {
     List<EventShortDto> getEvents(Long userId, int from, int size);
 
     /**
-     * Выполняет публичный поиск только среди опубликованных событий и регистрирует просмотр списка.
+     * Выполняет публичный поиск только среди опубликованных событий.
      *
      * @param text текст для поиска в аннотации и описании
      * @param categories категории событий
@@ -85,7 +84,6 @@ public interface EventService {
      * @param sort способ сортировки результата
      * @param from смещение первого результата
      * @param size размер страницы
-     * @param request HTTP-запрос, из которого берутся URI и IP клиента
      * @return краткая информация о найденных событиях
      * @throws ewm.common.exception.BadRequestException если конец диапазона раньше начала
      */
@@ -97,8 +95,11 @@ public interface EventService {
                                         Boolean onlyAvailable,
                                         EventSort sort,
                                         int from,
-                                        int size,
-                                        HttpServletRequest request);
+                                        int size);
+
+    List<EventShortDto> getRecommendations(long userId, int maxResults);
+
+    EventFullDto like(Long eventId, long userId);
 
     /**
      * Обновляет событие инициатором.

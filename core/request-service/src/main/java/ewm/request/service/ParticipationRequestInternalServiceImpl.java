@@ -61,4 +61,30 @@ public class ParticipationRequestInternalServiceImpl implements ParticipationReq
 
         return result;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Boolean> existsUserConfirmedRequestsForEvents(Long userId, List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, Boolean> result = eventIds.stream()
+                .distinct()
+                .collect(Collectors.toMap(
+                        id -> id,
+                        id -> false,
+                        (left, right) -> left,
+                        LinkedHashMap::new
+                ));
+
+        requestRepository.findAllByRequesterIdAndEventIdInAndStatus(
+                        userId,
+                        result.keySet().stream().toList(),
+                        RequestStatus.CONFIRMED
+                )
+                .forEach(request -> result.put(ParticipationRequestMapper.getEventId(request), true));
+
+        return result;
+    }
 }

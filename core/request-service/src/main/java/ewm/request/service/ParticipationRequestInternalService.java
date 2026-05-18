@@ -34,4 +34,6 @@ public interface ParticipationRequestInternalService {
      * @return карта {@code eventId -> заявка существует}
      */
     Map<Long, Boolean> existsUserRequestsForEvents(Long userId, List<Long> eventIds);
+
+    Map<Long, Boolean> existsUserConfirmedRequestsForEvents(Long userId, List<Long> eventIds);
 }

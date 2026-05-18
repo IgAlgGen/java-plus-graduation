@@ -31,4 +31,6 @@ public interface EventRepository {
     Optional<Event> findById(Long eventId);
 
     Optional<Event> findByIdAndState(Long eventId, EventState eventState);
+
+    List<Event> findAllById(Iterable<Long> eventIds);
 }
